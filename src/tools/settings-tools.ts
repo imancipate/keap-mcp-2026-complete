@@ -53,7 +53,7 @@ export function createSettingsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          entity_type: { type: 'string', description: 'Entity type (Contact, Company, Opportunity, etc.)', required: true },
+          entity_type: { type: 'string', description: 'Entity type (Contact, Company, Opportunity, etc.)' },
         },
         required: ['entity_type'],
       },

@@ -9,9 +9,9 @@ export function createAppointmentsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          title: { type: 'string', description: 'Appointment title', required: true },
-          start_date: { type: 'string', description: 'Start date/time (ISO format)', required: true },
-          end_date: { type: 'string', description: 'End date/time (ISO format)', required: true },
+          title: { type: 'string', description: 'Appointment title' },
+          start_date: { type: 'string', description: 'Start date/time (ISO format)' },
+          end_date: { type: 'string', description: 'End date/time (ISO format)' },
           description: { type: 'string', description: 'Appointment description' },
           location: { type: 'string', description: 'Location' },
           contact_id: { type: 'number', description: 'Associated contact ID' },
@@ -28,7 +28,7 @@ export function createAppointmentsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          appointment_id: { type: 'number', description: 'Appointment ID', required: true },
+          appointment_id: { type: 'number', description: 'Appointment ID' },
         },
         required: ['appointment_id'],
       },
@@ -39,7 +39,7 @@ export function createAppointmentsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          appointment_id: { type: 'number', description: 'Appointment ID', required: true },
+          appointment_id: { type: 'number', description: 'Appointment ID' },
           title: { type: 'string', description: 'Appointment title' },
           start_date: { type: 'string', description: 'Start date/time' },
           end_date: { type: 'string', description: 'End date/time' },
@@ -55,7 +55,7 @@ export function createAppointmentsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          appointment_id: { type: 'number', description: 'Appointment ID to delete', required: true },
+          appointment_id: { type: 'number', description: 'Appointment ID to delete' },
         },
         required: ['appointment_id'],
       },

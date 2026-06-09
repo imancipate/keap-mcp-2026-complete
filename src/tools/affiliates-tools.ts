@@ -9,9 +9,9 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID for this affiliate', required: true },
-          code: { type: 'string', description: 'Affiliate code', required: true },
-          name: { type: 'string', description: 'Affiliate name', required: true },
+          contact_id: { type: 'number', description: 'Contact ID for this affiliate' },
+          code: { type: 'string', description: 'Affiliate code' },
+          name: { type: 'string', description: 'Affiliate name' },
           parent_id: { type: 'number', description: 'Parent affiliate ID' },
           track_leads_for: { type: 'number', description: 'Number of days to track leads' },
         },
@@ -24,7 +24,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
         },
         required: ['affiliate_id'],
       },
@@ -47,7 +47,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
         },
         required: ['affiliate_id'],
       },
@@ -58,7 +58,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
           since: { type: 'string', description: 'Commissions after this date' },
           until: { type: 'string', description: 'Commissions before this date' },
           limit: { type: 'number', description: 'Results per page', default: 50 },
@@ -72,7 +72,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
         },
         required: ['affiliate_id'],
       },
@@ -83,7 +83,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
         },
         required: ['affiliate_id'],
       },
@@ -94,7 +94,7 @@ export function createAffiliatesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          affiliate_id: { type: 'number', description: 'Affiliate ID', required: true },
+          affiliate_id: { type: 'number', description: 'Affiliate ID' },
         },
         required: ['affiliate_id'],
       },

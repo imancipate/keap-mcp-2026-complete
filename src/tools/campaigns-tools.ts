@@ -22,7 +22,7 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          campaign_id: { type: 'number', description: 'Campaign ID', required: true },
+          campaign_id: { type: 'number', description: 'Campaign ID' },
         },
         required: ['campaign_id'],
       },
@@ -33,8 +33,8 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          campaign_id: { type: 'number', description: 'Campaign ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          campaign_id: { type: 'number', description: 'Campaign ID' },
         },
         required: ['contact_id', 'campaign_id'],
       },
@@ -45,8 +45,8 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          campaign_id: { type: 'number', description: 'Campaign ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          campaign_id: { type: 'number', description: 'Campaign ID' },
         },
         required: ['contact_id', 'campaign_id'],
       },
@@ -57,7 +57,7 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          campaign_id: { type: 'number', description: 'Campaign ID', required: true },
+          campaign_id: { type: 'number', description: 'Campaign ID' },
         },
         required: ['campaign_id'],
       },
@@ -68,8 +68,8 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          sequence_id: { type: 'number', description: 'Sequence ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          sequence_id: { type: 'number', description: 'Sequence ID' },
         },
         required: ['contact_id', 'sequence_id'],
       },
@@ -80,8 +80,8 @@ export function createCampaignsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          sequence_id: { type: 'number', description: 'Sequence ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          sequence_id: { type: 'number', description: 'Sequence ID' },
         },
         required: ['contact_id', 'sequence_id'],
       },

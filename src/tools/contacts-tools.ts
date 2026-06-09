@@ -35,7 +35,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
           optional_properties: { type: 'array', items: { type: 'string' }, description: 'Additional fields to include' },
         },
         required: ['contact_id'],
@@ -47,7 +47,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
           given_name: { type: 'string', description: 'First name' },
           family_name: { type: 'string', description: 'Last name' },
           email: { type: 'string', description: 'Primary email address' },
@@ -67,7 +67,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID to delete', required: true },
+          contact_id: { type: 'number', description: 'Contact ID to delete' },
         },
         required: ['contact_id'],
       },
@@ -109,8 +109,8 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          source_contact_id: { type: 'number', description: 'Contact ID to merge from (will be deleted)', required: true },
-          target_contact_id: { type: 'number', description: 'Contact ID to merge into (will be kept)', required: true },
+          source_contact_id: { type: 'number', description: 'Contact ID to merge from (will be deleted)' },
+          target_contact_id: { type: 'number', description: 'Contact ID to merge into (will be kept)' },
         },
         required: ['source_contact_id', 'target_contact_id'],
       },
@@ -121,8 +121,8 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          tag_ids: { type: 'array', items: { type: 'number' }, description: 'Array of tag IDs to apply', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          tag_ids: { type: 'array', items: { type: 'number' }, description: 'Array of tag IDs to apply' },
         },
         required: ['contact_id', 'tag_ids'],
       },
@@ -133,8 +133,8 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          tag_ids: { type: 'array', items: { type: 'number' }, description: 'Array of tag IDs to remove', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          tag_ids: { type: 'array', items: { type: 'number' }, description: 'Array of tag IDs to remove' },
         },
         required: ['contact_id', 'tag_ids'],
       },
@@ -145,7 +145,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
         },
         required: ['contact_id'],
       },
@@ -156,7 +156,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
         },
         required: ['contact_id'],
       },
@@ -167,8 +167,8 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          email: { type: 'string', description: 'Email address', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          email: { type: 'string', description: 'Email address' },
           field: { type: 'string', description: 'Field type (EMAIL1, EMAIL2, EMAIL3)', default: 'EMAIL1' },
         },
         required: ['contact_id', 'email'],
@@ -180,8 +180,8 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          email_id: { type: 'number', description: 'Email ID to remove', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          email_id: { type: 'number', description: 'Email ID to remove' },
         },
         required: ['contact_id', 'email_id'],
       },
@@ -192,7 +192,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
         },
         required: ['contact_id'],
       },
@@ -203,10 +203,10 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          card_number: { type: 'string', description: 'Credit card number', required: true },
-          expiration_month: { type: 'string', description: 'Expiration month (MM)', required: true },
-          expiration_year: { type: 'string', description: 'Expiration year (YYYY)', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          card_number: { type: 'string', description: 'Credit card number' },
+          expiration_month: { type: 'string', description: 'Expiration month (MM)' },
+          expiration_year: { type: 'string', description: 'Expiration year (YYYY)' },
           card_type: { type: 'string', description: 'Card type (Visa, Mastercard, etc.)' },
           name_on_card: { type: 'string', description: 'Name as shown on card' },
         },
@@ -219,7 +219,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
         },
         required: ['contact_id'],
       },
@@ -230,9 +230,9 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          custom_field_id: { type: 'number', description: 'Custom field ID', required: true },
-          content: { type: 'string', description: 'New value for the custom field', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          custom_field_id: { type: 'number', description: 'Custom field ID' },
+          content: { type: 'string', description: 'New value for the custom field' },
         },
         required: ['contact_id', 'custom_field_id', 'content'],
       },
@@ -243,7 +243,7 @@ export function createContactsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
           limit: { type: 'number', description: 'Max results', default: 50 },
           offset: { type: 'number', description: 'Pagination offset', default: 0 },
         },

@@ -9,7 +9,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Tag name', required: true },
+          name: { type: 'string', description: 'Tag name' },
           description: { type: 'string', description: 'Tag description' },
           category_id: { type: 'number', description: 'Tag category ID' },
         },
@@ -22,7 +22,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          tag_id: { type: 'number', description: 'Tag ID', required: true },
+          tag_id: { type: 'number', description: 'Tag ID' },
         },
         required: ['tag_id'],
       },
@@ -45,7 +45,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Category name', required: true },
+          name: { type: 'string', description: 'Category name' },
           description: { type: 'string', description: 'Category description' },
         },
         required: ['name'],

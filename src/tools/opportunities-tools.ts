@@ -9,9 +9,9 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          opportunity_title: { type: 'string', description: 'Deal/opportunity title', required: true },
-          contact_id: { type: 'number', description: 'Contact ID associated with this opportunity', required: true },
-          stage_id: { type: 'number', description: 'Pipeline stage ID', required: true },
+          opportunity_title: { type: 'string', description: 'Deal/opportunity title' },
+          contact_id: { type: 'number', description: 'Contact ID associated with this opportunity' },
+          stage_id: { type: 'number', description: 'Pipeline stage ID' },
           user_id: { type: 'number', description: 'User ID (owner of opportunity)' },
           estimated_close_date: { type: 'string', description: 'Estimated close date (ISO format)' },
           projected_revenue_low: { type: 'number', description: 'Low revenue estimate' },
@@ -30,7 +30,7 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          opportunity_id: { type: 'number', description: 'Opportunity ID', required: true },
+          opportunity_id: { type: 'number', description: 'Opportunity ID' },
           optional_properties: { type: 'array', items: { type: 'string' }, description: 'Additional fields to include' },
         },
         required: ['opportunity_id'],
@@ -42,7 +42,7 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          opportunity_id: { type: 'number', description: 'Opportunity ID', required: true },
+          opportunity_id: { type: 'number', description: 'Opportunity ID' },
           opportunity_title: { type: 'string', description: 'Deal title' },
           stage_id: { type: 'number', description: 'Pipeline stage ID' },
           user_id: { type: 'number', description: 'User ID (owner)' },
@@ -62,7 +62,7 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          opportunity_id: { type: 'number', description: 'Opportunity ID to delete', required: true },
+          opportunity_id: { type: 'number', description: 'Opportunity ID to delete' },
         },
         required: ['opportunity_id'],
       },
@@ -97,7 +97,7 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          stage_id: { type: 'number', description: 'Stage ID', required: true },
+          stage_id: { type: 'number', description: 'Stage ID' },
         },
         required: ['stage_id'],
       },
@@ -108,8 +108,8 @@ export function createOpportunitiesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          opportunity_id: { type: 'number', description: 'Opportunity ID', required: true },
-          stage_id: { type: 'number', description: 'New stage ID', required: true },
+          opportunity_id: { type: 'number', description: 'Opportunity ID' },
+          stage_id: { type: 'number', description: 'New stage ID' },
           move_to_stage_reason: { type: 'string', description: 'Reason for stage change' },
         },
         required: ['opportunity_id', 'stage_id'],

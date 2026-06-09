@@ -9,8 +9,8 @@ export function createAutomationsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          eventKey: { type: 'string', description: 'Event key (e.g., contact.add, opportunity.add)', required: true },
-          hookUrl: { type: 'string', description: 'Webhook URL to call', required: true },
+          eventKey: { type: 'string', description: 'Event key (e.g., contact.add, opportunity.add)' },
+          hookUrl: { type: 'string', description: 'Webhook URL to call' },
         },
         required: ['eventKey', 'hookUrl'],
       },
@@ -29,7 +29,7 @@ export function createAutomationsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          hook_key: { type: 'string', description: 'Hook key to delete', required: true },
+          hook_key: { type: 'string', description: 'Hook key to delete' },
         },
         required: ['hook_key'],
       },
@@ -40,7 +40,7 @@ export function createAutomationsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          hook_key: { type: 'string', description: 'Hook key to verify', required: true },
+          hook_key: { type: 'string', description: 'Hook key to verify' },
         },
         required: ['hook_key'],
       },
@@ -51,7 +51,7 @@ export function createAutomationsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          hook_key: { type: 'string', description: 'Hook key to update', required: true },
+          hook_key: { type: 'string', description: 'Hook key to update' },
           hookUrl: { type: 'string', description: 'New webhook URL' },
           status: { type: 'string', description: 'Hook status (Active, Inactive)' },
         },

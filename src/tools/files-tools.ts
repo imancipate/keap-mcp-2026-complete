@@ -9,8 +9,8 @@ export function createFilesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          file_name: { type: 'string', description: 'Name of the file', required: true },
-          file_data: { type: 'string', description: 'Base64 encoded file data', required: true },
+          file_name: { type: 'string', description: 'Name of the file' },
+          file_data: { type: 'string', description: 'Base64 encoded file data' },
           contact_id: { type: 'number', description: 'Associate with contact ID' },
           is_public: { type: 'boolean', description: 'Make file publicly accessible', default: false },
         },
@@ -23,7 +23,7 @@ export function createFilesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          file_id: { type: 'number', description: 'File ID', required: true },
+          file_id: { type: 'number', description: 'File ID' },
         },
         required: ['file_id'],
       },
@@ -34,7 +34,7 @@ export function createFilesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          file_id: { type: 'number', description: 'File ID to delete', required: true },
+          file_id: { type: 'number', description: 'File ID to delete' },
         },
         required: ['file_id'],
       },

@@ -9,8 +9,8 @@ export function createEmailsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contacts: { type: 'array', items: { type: 'number' }, description: 'Array of contact IDs', required: true },
-          subject: { type: 'string', description: 'Email subject', required: true },
+          contacts: { type: 'array', items: { type: 'number' }, description: 'Array of contact IDs' },
+          subject: { type: 'string', description: 'Email subject' },
           html_content: { type: 'string', description: 'HTML content of email' },
           text_content: { type: 'string', description: 'Plain text content of email' },
           from_address: { type: 'string', description: 'From email address' },
@@ -26,7 +26,7 @@ export function createEmailsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          email_id: { type: 'number', description: 'Email ID', required: true },
+          email_id: { type: 'number', description: 'Email ID' },
         },
         required: ['email_id'],
       },
@@ -51,8 +51,8 @@ export function createEmailsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Template name', required: true },
-          subject: { type: 'string', description: 'Email subject', required: true },
+          name: { type: 'string', description: 'Template name' },
+          subject: { type: 'string', description: 'Email subject' },
           html_content: { type: 'string', description: 'HTML content' },
           text_content: { type: 'string', description: 'Plain text content' },
         },
@@ -75,8 +75,8 @@ export function createEmailsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          email: { type: 'string', description: 'Email address', required: true },
-          opt_in_reason: { type: 'string', description: 'Reason for opt-in', required: true },
+          email: { type: 'string', description: 'Email address' },
+          opt_in_reason: { type: 'string', description: 'Reason for opt-in' },
         },
         required: ['email', 'opt_in_reason'],
       },
@@ -87,7 +87,7 @@ export function createEmailsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          email: { type: 'string', description: 'Email address', required: true },
+          email: { type: 'string', description: 'Email address' },
         },
         required: ['email'],
       },
