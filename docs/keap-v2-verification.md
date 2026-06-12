@@ -1,3 +1,14 @@
+# CORRECTION (post-Fable adversarial review)
+
+An earlier conclusion — "keap_v2_list_merchants is an unfixable Keap server bug" — was WRONG.
+A Fable subagent refuted it: `?page_size=5` -> 200, `filter=id==34` -> 200, and v1 `/crm/rest/v1/merchants` -> 200 full list.
+Root cause: v2 serializer can't map legacy merchant row id=23 ("NetworkMerchants") and throws instead of
+falling back to UNSUPPORTED. Any page containing row 23 -> 500.
+FIX: keap_v2_list_merchants now routes to v1 `/merchants` (V1_FALLBACK in the generated module).
+Live-verified: returns 200, 10 accounts incl. row 23. ALL 113 tools now functional.
+
+---
+
 # Keap v2 per-tool live verification (through keap.zeyadhq.workers.dev)
 
 GET OK=44 ERROR=1 NO-DATA=5 | writes withheld=63

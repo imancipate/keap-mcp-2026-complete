@@ -3927,6 +3927,13 @@ const V2_OPS: V2Op[] = [
 
 const BY_NAME = new Map<string, V2Op>(V2_OPS.map((o) => [o.name, o]));
 
+// Some v2 endpoints 500 on legacy rows the v2 serializer can't map (e.g. merchants
+// row id=23 "NetworkMerchants"). The v1 path serializes the full list correctly,
+// so fall back to it. Verified: GET /crm/rest/v1/merchants -> 200 full list.
+const V1_FALLBACK: Record<string, { method: string; url: string }> = {
+  keap_v2_list_merchants: { method: 'GET', url: '/merchants' },
+};
+
 export function createV2Tools(_client: KeapClient): Tool[] {
   return V2_OPS.map((o) => ({
     name: o.name,
@@ -3941,6 +3948,11 @@ export function v2ToolNames(): string[] {
 
 // Generic executor: fills path params, splits query vs body, calls the v2 client.
 export async function handleV2Tool(name: string, args: any, client: KeapClient): Promise<any> {
+  const fb = V1_FALLBACK[name];
+  if (fb) {
+    const r = await client.get<any>(fb.url);
+    return { content: [{ type: 'text', text: JSON.stringify(r, null, 2) }] };
+  }
   const op = BY_NAME.get(name);
   if (!op) throw new Error(`Unknown v2 tool: ${name}`);
   args = args || {};
