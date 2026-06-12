@@ -19,6 +19,8 @@ export class KeapClient {
 
     this.client = axios.create({
       baseURL: this.baseURL,
+      // 'fetch' adapter lets this client run on Cloudflare Workers (no XHR / Node http).
+      adapter: 'fetch',
       headers: {
         'Content-Type': 'application/json',
         ...(this.accessToken && { 'Authorization': `Bearer ${this.accessToken}` }),
@@ -144,6 +146,7 @@ export class KeapClient {
     await this.checkRateLimit();
     const response = await axios.request<T>({
       ...v2Config,
+      adapter: 'fetch',
       headers: {
         'Content-Type': 'application/json',
         ...(this.accessToken && { 'Authorization': `Bearer ${this.accessToken}` }),

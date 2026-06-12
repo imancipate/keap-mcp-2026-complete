@@ -12,19 +12,25 @@
     "build": "tsc && npm run build:apps",
     "build:apps": "cd src/ui/react-app && npm run build",
     "dev": "tsx src/main.ts",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy",
     "prepublishOnly": "npm run build",
     "test": "vitest"
   },
   "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^0.7.2",
     "@modelcontextprotocol/sdk": "^1.0.4",
+    "agents": "^0.15.0",
     "axios": "^1.7.0",
     "dotenv": "^16.4.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260610.1",
     "@types/node": "^22.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "wrangler": "^4.99.0"
   },
   "keywords": [
     "mcp",
