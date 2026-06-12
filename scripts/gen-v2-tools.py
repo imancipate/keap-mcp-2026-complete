@@ -1,11 +1,23 @@
-import yaml, re, json
+import yaml, re, json, hashlib
 spec = yaml.safe_load(open('scripts/keap_v2_openapi.yml'))
 paths = spec['paths']
 comp = spec.get('components', {}).get('schemas', {})
 
-# 28 net-new resources (zero coverage in v1 MCP)
-COVERED_PARTIAL = {'Contact','Company','Opportunity','Task','Tags','Note','Email','Files',
- 'Campaign','Orders','Products','Subscriptions','Affiliate','Users','Settings','Email Address'}
+# Generate EVERY v2 operation. Earlier this skipped any tag already present in v1
+# (COVERED_PARTIAL), which dropped the v2 versions of Contact/Tags/Orders/
+# Opportunity/Task/Subscriptions/Email — i.e. exactly the advanced-filtering
+# endpoints the v1 tools lack. Full coverage instead; v2 names are keap_v2_*-
+# prefixed so they never collide with the v1 keap_* tools.
+COVERED_PARTIAL = set()
+
+# MCP / Anthropic / OpenAI cap tool names at 64 chars (^[a-zA-Z0-9_-]{1,64}$).
+# Clamp deterministically so regeneration can never reintroduce an over-length
+# name: keep a readable prefix + a stable 6-char hash of the full name.
+def clamp_name(name):
+    if len(name) <= 64:
+        return name
+    h = hashlib.md5(name.encode()).hexdigest()[:6]
+    return name[:57] + '_' + h
 
 def snake(s):
     s = re.sub(r'(?<!^)(?=[A-Z])', '_', s)        # camelCase -> camel_Case
@@ -48,7 +60,7 @@ for path, methods in paths.items():
         tag = (op.get('tags') or ['?'])[0]
         if tag in COVERED_PARTIAL: continue   # only net-new
         opid = op.get('operationId','')
-        name = 'keap_v2_' + snake(opid)
+        name = clamp_name('keap_v2_' + snake(opid))
         url = path.replace('/rest/v2','')      # client.requestV2 baseURL already includes /crm/rest/v2
         path_params = re.findall(r'\{([^}]+)\}', url)
         params = op.get('parameters', [])
@@ -83,12 +95,16 @@ for path, methods in paths.items():
             'tag': tag,
         })
 
-# dedupe by name
+# dedupe by name, keeping every name <= 64 chars
 seen=set(); uniq=[]
 for o in ops:
-    if o['name'] in seen:
-        o['name'] = o['name'] + '_' + o['method'].lower()
-    seen.add(o['name']); uniq.append(o)
+    base = o['name']
+    if base in seen:
+        base = clamp_name(o['name'] + '_' + o['method'].lower())
+    while base in seen:
+        base = clamp_name(o['name'] + '_' + hashlib.md5((o['url']+o['method']).encode()).hexdigest()[:6])
+    o['name'] = base
+    seen.add(base); uniq.append(o)
 ops = uniq
 print(f"generated {len(ops)} ops; unique names: {len(set(o['name'] for o in ops))}")
 
@@ -99,8 +115,8 @@ for o in ops:
         'name':o['name'],'description':o['description'],'method':o['method'],'url':o['url'],
         'pathParams':o['pathParams'],'query':o['query'],'body':o['body'],'inputSchema':o['inputSchema']
     })
-ts = """// AUTO-GENERATED from Keap v2 OpenAPI (keap_v2.yml). Do not hand-edit.
-// 113 net-new v2 operations the v1 MCP lacks. Regenerate via /tmp/gen_v2_tools.py.
+ts = ("""// AUTO-GENERATED from Keap v2 OpenAPI (scripts/keap_v2_openapi.yml). Do not hand-edit.
+// Full v2 coverage: """ + str(len(ops)) + """ operations. Regenerate via: python3 scripts/gen-v2-tools.py
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { KeapClient } from '../clients/keap.js';
 
@@ -167,7 +183,7 @@ export async function handleV2Tool(name: string, args: any, client: KeapClient):
   const result = await client.requestV2<any>(cfg);
   return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 }
-"""
+""")
 open('src/tools/v2-generated-tools.ts','w').write(ts)
 print("WROTE src/tools/v2-generated-tools.ts")
 print("sample names:", [o['name'] for o in ops[:6]])

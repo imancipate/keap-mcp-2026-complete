@@ -24,33 +24,50 @@ function fakeClient(): KeapClient {
   return new KeapClient(undefined, 'test-key');
 }
 
-// Walks a schema and returns human-readable violations of draft-2020-12 /
-// Anthropic strictness.
+// Validates a single (sub)schema for draft-2020-12 / Anthropic strictness, then
+// recurses ONLY into nested sub-schemas. Critically, it does NOT treat keys
+// inside `properties` as schema keywords — a request field may legitimately be
+// named "required", "type", "items", etc. Matching on key names there produced
+// false positives; this walks the schema structurally instead.
 function schemaViolations(schema: any, path: string, out: string[]): void {
-  if (schema === null || typeof schema !== 'object') return;
-  if (Array.isArray(schema)) {
-    schema.forEach((s, i) => schemaViolations(s, `${path}[${i}]`, out));
-    return;
+  if (schema === null || typeof schema !== 'object' || Array.isArray(schema)) return;
+
+  // --- keyword-level checks on THIS schema node ---
+  if ('required' in schema && !Array.isArray(schema.required)) {
+    out.push(`${path}.required is ${typeof schema.required} (must be string[])`);
   }
-  for (const [k, v] of Object.entries(schema)) {
-    // `required` must be an array of strings; a boolean is the classic bug.
-    if (k === 'required' && !Array.isArray(v)) {
-      out.push(`${path}.required is ${typeof v} (must be string[])`);
+  if (Array.isArray(schema.type)) out.push(`${path}.type is an array (union types rejected)`);
+  if (typeof schema.type === 'string' && !VALID_TYPES.has(schema.type)) {
+    out.push(`${path}.type='${schema.type}' is not a valid JSON Schema type`);
+  }
+  if ('definitions' in schema) out.push(`${path}.definitions (use $defs)`);
+  if ('dependencies' in schema) out.push(`${path}.dependencies (removed in 2020-12)`);
+  if ('additionalItems' in schema) out.push(`${path}.additionalItems (removed in 2020-12)`);
+  if (Array.isArray(schema.items)) out.push(`${path}.items is a tuple (use prefixItems)`);
+  if (typeof schema.exclusiveMinimum === 'boolean') out.push(`${path}.exclusiveMinimum is boolean (draft-04)`);
+  if (typeof schema.exclusiveMaximum === 'boolean') out.push(`${path}.exclusiveMaximum is boolean (draft-04)`);
+
+  // --- recurse into nested sub-schemas only ---
+  if (schema.properties && typeof schema.properties === 'object') {
+    for (const [name, sub] of Object.entries(schema.properties)) {
+      schemaViolations(sub, `${path}.properties.${name}`, out);
     }
-    // Union types ["string","null"] are rejected by Anthropic.
-    if (k === 'type' && Array.isArray(v)) out.push(`${path}.type is an array`);
-    if (k === 'type' && typeof v === 'string' && !VALID_TYPES.has(v)) {
-      out.push(`${path}.type='${v}' is not a valid JSON Schema type`);
+  }
+  if (schema.items && typeof schema.items === 'object') {
+    schemaViolations(schema.items, `${path}.items`, out);
+  }
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    schemaViolations(schema.additionalProperties, `${path}.additionalProperties`, out);
+  }
+  for (const comb of ['allOf', 'anyOf', 'oneOf'] as const) {
+    if (Array.isArray(schema[comb])) {
+      schema[comb].forEach((s: any, i: number) => schemaViolations(s, `${path}.${comb}[${i}]`, out));
     }
-    // Keywords removed in / invalid under draft 2020-12.
-    if (k === 'definitions') out.push(`${path}.definitions (use $defs)`);
-    if (k === 'dependencies') out.push(`${path}.dependencies (removed in 2020-12)`);
-    if (k === 'additionalItems') out.push(`${path}.additionalItems (removed in 2020-12)`);
-    if (k === 'items' && Array.isArray(v)) out.push(`${path}.items is a tuple (use prefixItems)`);
-    if ((k === 'exclusiveMinimum' || k === 'exclusiveMaximum') && typeof v === 'boolean') {
-      out.push(`${path}.${k} is boolean (draft-04 style)`);
+  }
+  if (schema.$defs && typeof schema.$defs === 'object') {
+    for (const [name, sub] of Object.entries(schema.$defs)) {
+      schemaViolations(sub, `${path}.$defs.${name}`, out);
     }
-    schemaViolations(v, `${path}.${k}`, out);
   }
 }
 

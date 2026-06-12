@@ -17,14 +17,17 @@ describe('register', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it('includes the 113 net-new v2 tools (atom 1: listed)', () => {
+  it('exposes the full v2 operation set (one tool per spec operation)', () => {
     const tools = getAllTools(fakeClient());
     const v2 = tools.filter((t) => t.name.startsWith('keap_v2_'));
-    expect(v2.length).toBe(113);
-    // atom 4: every v2 tool has a valid object inputSchema
+    // The Keap v2 OpenAPI spec defines 343 operations; the generator emits one
+    // tool per operation. Locked to v2ToolNames() so this tracks regeneration.
+    expect(v2.length).toBe(v2ToolNames().length);
+    expect(v2.length).toBeGreaterThanOrEqual(343);
+    // every v2 tool has a valid object inputSchema
     expect(v2.every((t) => (t.inputSchema as any)?.type === 'object')).toBe(true);
-    // atom 5: unique across the whole set
-    expect(new Set(v2.map((t) => t.name)).size).toBe(113);
+    // unique across the whole v2 set
+    expect(new Set(v2.map((t) => t.name)).size).toBe(v2.length);
   });
 
   it('dispatchTool routes every v2 tool name to the v2 handler (atom 2 + 6: routed, deterministic)', async () => {
