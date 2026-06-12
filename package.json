@@ -13,9 +13,12 @@
     "build:apps": "cd src/ui/react-app && npm run build",
     "dev": "tsx src/main.ts",
     "worker:dev": "wrangler dev",
-    "worker:deploy": "wrangler deploy",
-    "prepublishOnly": "npm run build",
-    "test": "vitest"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "predeploy": "vitest run",
+    "deploy": "wrangler deploy",
+    "worker:deploy": "npm run predeploy && wrangler deploy",
+    "prepublishOnly": "npm run test:run && npm run build"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^0.7.2",

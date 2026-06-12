@@ -3611,8 +3611,8 @@ const V2_OPS: V2Op[] = [
     }
   },
   {
-    "name": "keap_v2_list_expenses_incurred_from_lead_source_recurring_expense",
-    "description": "Retrieves a list of expenses incurred from a recurring expense",
+    "name": "keap_v2_list_lead_source_recurring_expense_charges",
+    "description": "Retrieves a list of expenses incurred from a lead-source recurring expense (renamed from keap_v2_list_expenses_incurred_from_lead_source_recurring_expense to fit the 64-char tool-name limit)",
     "method": "GET",
     "url": "/leadSources/{lead_source_id}/recurringExpenses/{lead_source_recurring_expense_id}/expenses",
     "pathParams": [
