@@ -19,6 +19,7 @@ import { createAutomationsTools, handleAutomationsTool } from './tools/automatio
 import { createSettingsTools, handleSettingsTool } from './tools/settings-tools.js';
 import { createAffiliatesTools, handleAffiliatesTool } from './tools/affiliates-tools.js';
 import { createV2Tools, handleV2Tool } from './tools/v2-generated-tools.js';
+import { createBulkTools, handleBulkTool } from './tools/bulk-tools.js';
 
 export function getAllTools(client: KeapClient): Tool[] {
   return [
@@ -37,6 +38,7 @@ export function getAllTools(client: KeapClient): Tool[] {
     ...createSettingsTools(client),
     ...createAffiliatesTools(client),
     ...createV2Tools(client),
+    ...createBulkTools(client),
   ];
 }
 
@@ -44,6 +46,11 @@ export function getAllTools(client: KeapClient): Tool[] {
 // Mirrors the routing in src/server.ts exactly so both transports behave the same.
 export async function dispatchTool(name: string, args: any, client: KeapClient): Promise<any> {
   try {
+    // Hand-written bulk helpers — exact-name match BEFORE the keap_v2_ prefix branch
+    // (the name has no keap_v2_ prefix, but route explicitly so intent is unambiguous).
+    if (name === 'keap_bulk_delete_contacts') {
+      return await handleBulkTool(name, args, client);
+    }
     // v2 generated tools route by exact-name map (deterministic — no substring collisions).
     if (name.startsWith('keap_v2_')) {
       return await handleV2Tool(name, args, client);

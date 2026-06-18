@@ -1,0 +1,61 @@
+schema_version: 3
+feature: "keap-v2-bulk-delete-contacts"
+created_at: "2026-06-17"
+last_updated: "2026-06-17T00:00:00Z"
+feature_mode: "lite"
+backfilled: false
+v2_native: true
+speckit_mode: "classic"
+
+workspace:
+  status: "active"
+  worktree: ".worktrees/feat-keap-v2-bulk-delete-contacts"
+  branch: "feat/keap-v2-bulk-delete-contacts"
+  base_ref: "feat/keap-v2-remote-worker"
+
+phases:
+  problem_discovery:
+    status: "skipped"
+    skipped: true
+    skip_reason: "Need already validated by user in conversation; bulk-delete gap confirmed against Keap v2 API (only emails:batchRemove exists; no contact bulk delete)."
+  research:
+    status: "not_applicable"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  revalidation:
+    status: "not_applicable"
+  bridge:
+    status: "not_applicable"
+  plan:
+    status: "completed"
+    digest_path: "plan.md"
+    adversarial_review: "adversarial-review.md"
+  tasks:
+    status: "not_applicable"
+  pre_impl_review:
+    status: "not_applicable"
+  implement:
+    status: "completed"
+    digest_path: "implementation-log.md"
+  code_review:
+    status: "not_applicable"
+  verify:
+    status: "completed"
+    digest_path: "verify-report.md"
+    runtime_evidence: "live Keap create→bulk-delete→404-confirm passed 2026-06-18"
+  test_plan:
+    status: "completed"
+    digest_path: "testing/test-plan.md"
+  test_run:
+    status: "completed"
+    digest_path: "test-report.md"
+    e2e_evidence: "MCP tools/list+tools/call against live Keap; create→bulk-delete→404 confirmed 2026-06-18"
+
+testing:
+  types: [unit, contract, integration, e2e-mcp]
+  test_case_count: 21
+  playwright_files: 0
+  note: "backend MCP tool — no UI; browser/E2E N/A. E2E done via real MCP protocol (stdio server + SDK client)."
+
+gates: []

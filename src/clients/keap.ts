@@ -139,10 +139,14 @@ export class KeapClient {
   // V2 API support (some endpoints use v2)
   async requestV2<T>(config: AxiosRequestConfig): Promise<T> {
     const v2Config = {
+      // Default a request timeout so a stuck call can't hang a caller forever.
+      // The raw axios.request path below does NOT inherit `this.client`'s 30s
+      // timeout, so set it explicitly. Callers may override via config.
+      timeout: 30000,
       ...config,
       baseURL: 'https://api.infusionsoft.com/crm/rest/v2',
     };
-    
+
     await this.checkRateLimit();
     const response = await axios.request<T>({
       ...v2Config,
@@ -169,7 +173,7 @@ export class KeapClient {
     return this.requestV2<T>({ method: 'PATCH', url: path, data });
   }
 
-  async deleteV2<T>(path: string): Promise<T> {
-    return this.requestV2<T>({ method: 'DELETE', url: path });
+  async deleteV2<T>(path: string, opts?: { timeout?: number; signal?: AbortSignal }): Promise<T> {
+    return this.requestV2<T>({ method: 'DELETE', url: path, ...opts });
   }
 }
