@@ -96,6 +96,30 @@ bugfix:
     source: "codex-adversarial-review"
     timestamp: "2026-06-18"
     superseded: false
+  - id: "BUG-004"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "reported"
+    affects: ["worker.ts", "scripts"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-005"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "reported"
+    affects: ["register.ts"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-006"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "reported"
+    affects: ["keap.ts"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
 
 sync_runs:
   last_run: "2026-06-18"

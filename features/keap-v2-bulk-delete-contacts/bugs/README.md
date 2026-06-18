@@ -16,6 +16,12 @@
 | [BUG-001](./BUG-001.md) | Per-invocation rate limiter exceeds shared 25 RPS under concurrency | high | spec-gap | ✅ verified (single-instance; cross-instance deferred) | FR-014 |
 | [BUG-002](./BUG-002.md) | `continue_on_error=false` not fail-fast at concurrency>1 | high | spec-gap / untested-flow | ✅ verified | FR-013 |
 | [BUG-003](./BUG-003.md) | Auth-fatal discards partial progress | medium | spec-gap | ✅ verified | FR-012 |
+| [BUG-004](./BUG-004.md) | APPROVAL_SECRET via query string on /admin/mint-client | high | spec-gap (security) | 🔴 reported → CR | worker.ts (pre-existing) + scripts |
+| [BUG-005](./BUG-005.md) | Destructive tool exposed to all clients, no kill-switch | high | spec-gap (authz) | 🔴 reported → CR | register.ts |
+| [BUG-006](./BUG-006.md) | 30s timeout applied to ALL 343 v2 tools | high | spec-gap | 🔴 reported → CR | keap.ts |
+
+> CF-4 (prod runs unmerged code) is a release-process blocker, not a code bug — tracked in
+> release-readiness.md action item 1 (MUST: merge PR #3).
 
 ## Disposition
 All three were **spec-gap** (code matched the written contracts; the contracts were too weak
