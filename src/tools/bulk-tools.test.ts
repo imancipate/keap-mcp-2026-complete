@@ -3,6 +3,7 @@ import {
   createBulkTools,
   handleBulkDeleteContacts,
   createRateLimiter,
+  _resetSharedLimiterForTests,
 } from './bulk-tools.js';
 import type { KeapClient } from '../clients/keap.js';
 
@@ -110,13 +111,27 @@ describe('keap_bulk_delete_contacts — 429 recovery (#FR-006)', () => {
   });
 });
 
-describe('keap_bulk_delete_contacts — auth is batch-fatal (#5)', () => {
-  it('throws on 401 regardless of continue_on_error and aborts the batch', async () => {
-    const deleteV2 = vi.fn().mockRejectedValue(axiosErr(401));
-    await expect(
-      handleBulkDeleteContacts({ contact_ids: [1, 2, 3], concurrency: 1, continue_on_error: true }, fakeClient(deleteV2))
-    ).rejects.toThrow(/auth failed/i);
-    expect(deleteV2.mock.calls.length).toBeLessThan(3); // stopped, not all attempted
+describe('keap_bulk_delete_contacts — auth is batch-fatal (#5, CR-001/BUG-003)', () => {
+  it('aborts on 401 and RETURNS structured partial progress (not a throw)', async () => {
+    // First delete succeeds, second hits 401 → batch aborts but the first delete
+    // already applied; caller must see it (CR-001/BUG-003).
+    let n = 0;
+    const deleteV2 = vi.fn(async () => {
+      n++;
+      if (n === 1) return undefined; // 1 applied
+      throw axiosErr(401);
+    });
+    const report = parseReport(
+      await handleBulkDeleteContacts(
+        { contact_ids: [1, 2, 3], concurrency: 1, continue_on_error: true },
+        fakeClient(deleteV2)
+      )
+    );
+    expect(report.aborted).toBe(true);
+    expect(report.fatal_status).toBe(401);
+    expect(report.deleted).toContain(1); // partial progress preserved
+    expect(report.failed.some((f: any) => f.status === 401)).toBe(true);
+    expect(deleteV2.mock.calls.length).toBeLessThan(3); // remaining ids not attempted
   });
 });
 
@@ -152,6 +167,59 @@ describe('keap_bulk_delete_contacts — concurrency bound', () => {
     });
     await handleBulkDeleteContacts({ contact_ids: [1, 2, 3, 4, 5, 6, 7, 8], concurrency: 3 }, fakeClient(deleteV2));
     expect(peak).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('keap_bulk_delete_contacts — fail-fast at high concurrency (CR-001/BUG-002)', () => {
+  it('continue_on_error=false stops after the first failure even when concurrency>1', async () => {
+    // continue_on_error=false forces serial execution, so the first failure halts
+    // the batch with NO further deletes dispatched (bounded blast radius).
+    const order: number[] = [];
+    const deleteV2 = vi.fn(async (path: string) => {
+      order.push(Number(path.split('/').pop()));
+      if (path.endsWith('/1')) throw axiosErr(500);
+      return undefined;
+    });
+    const report = parseReport(
+      await handleBulkDeleteContacts(
+        { contact_ids: [1, 2, 3, 4, 5], concurrency: 5, continue_on_error: false },
+        fakeClient(deleteV2)
+      )
+    );
+    expect(deleteV2).toHaveBeenCalledTimes(1); // only id 1 attempted, then stop
+    expect(report.fail).toBe(1);
+    expect(report.deleted).toEqual([]);
+  });
+});
+
+describe('keap_bulk_delete_contacts — shared rate limiter across calls (CR-001/BUG-001)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    _resetSharedLimiterForTests();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('two concurrent bulk-delete calls share ONE limiter (aggregate <= MAX_RPS)', async () => {
+    const starts: number[] = [];
+    const deleteV2 = vi.fn(async () => {
+      starts.push(Date.now());
+    });
+    const c = fakeClient(deleteV2);
+    const p1 = handleBulkDeleteContacts({ contact_ids: [1, 2, 3], concurrency: 3 }, c);
+    const p2 = handleBulkDeleteContacts({ contact_ids: [4, 5, 6], concurrency: 3 }, c);
+    await vi.advanceTimersByTimeAsync(2000);
+    await Promise.all([p1, p2]);
+    expect(starts.length).toBe(6);
+    // MAX_RPS=10 → 100ms spacing. If each call had its OWN limiter, both calls'
+    // first deletes would fire at t=0 (gap 0). A shared limiter forces every start
+    // ≥100ms apart globally.
+    const sorted = [...starts].sort((a, b) => a - b);
+    for (let i = 1; i < sorted.length; i++) {
+      expect(sorted[i] - sorted[i - 1]).toBeGreaterThanOrEqual(100);
+    }
   });
 });
 

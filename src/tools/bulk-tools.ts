@@ -34,6 +34,11 @@ export interface BulkDeleteReport {
   deleted: number[];
   failed: BulkDeleteFailure[];
   would_delete?: number[];
+  // CR-001/BUG-003: on a fatal auth abort, return partial progress instead of
+  // throwing, so callers know exactly which deletes already applied (irreversible).
+  aborted?: boolean;
+  fatal_status?: number;
+  attempted?: number;
 }
 
 export function createBulkTools(_client: KeapClient): Tool[] {
@@ -88,6 +93,27 @@ export function createRateLimiter(rps: number): () => Promise<void> {
     const wait = start - now;
     if (wait > 0) await sleep(wait);
   };
+}
+
+// CR-001/BUG-001: a PROCESS-GLOBAL limiter shared across ALL invocations in this
+// worker instance. The Keap 25 req/s spike limit is per-app (one shared credential),
+// so a per-call limiter would let concurrent tool calls collectively overrun it. This
+// module-scope state serializes the rate budget across overlapping requests.
+// (Cross-INSTANCE coordination — multiple worker isolates — remains out of scope;
+// would need Durable Objects / KV leasing. Single-instance worker is the deploy target.)
+let _sharedNext = 0;
+async function sharedAcquire(): Promise<void> {
+  const interval = 1000 / MAX_RPS;
+  const now = Date.now();
+  const start = Math.max(now, _sharedNext);
+  _sharedNext = start + interval;
+  const wait = start - now;
+  if (wait > 0) await sleep(wait);
+}
+// Test-only: reset the global limiter's cursor so a unit test isn't affected by the
+// rate budget consumed by earlier tests/calls in the same process.
+export function _resetSharedLimiterForTests(): void {
+  _sharedNext = 0;
 }
 
 function statusOf(err: any): number | null {
@@ -152,6 +178,11 @@ export async function handleBulkDeleteContacts(
   const dryRun = args?.dry_run === true;
   let concurrency = Number.isSafeInteger(args?.concurrency) ? args.concurrency : DEFAULT_CONCURRENCY;
   concurrency = Math.max(1, Math.min(MAX_CONCURRENCY, concurrency));
+  // CR-001/BUG-002: deterministic fail-fast for a DESTRUCTIVE op. With >1 worker,
+  // in-flight deletes already dispatched cannot be recalled, so "stop on first
+  // error" can only be honored exactly by running serially. Force concurrency=1
+  // when continue_on_error is false.
+  if (!continueOnError) concurrency = 1;
 
   if (dryRun) {
     const report: BulkDeleteReport = {
@@ -168,7 +199,7 @@ export async function handleBulkDeleteContacts(
 
   // Audit log for a destructive bulk operation (goes to server stderr, not MCP output).
   console.error(`[keap_bulk_delete_contacts] executing: ${ids.length} unique ids, concurrency=${concurrency}, dry_run=false`);
-  const acquire = createRateLimiter(MAX_RPS);
+  const acquire = sharedAcquire; // CR-001/BUG-001: process-global, shared across calls
   const deleted: number[] = [];
   const failed: BulkDeleteFailure[] = [];
   let cursor = 0;
@@ -209,10 +240,25 @@ export async function handleBulkDeleteContacts(
 
   await Promise.all(Array.from({ length: concurrency }, () => worker()));
 
+  // CR-001/BUG-003: on a fatal auth abort, do NOT throw away partial progress.
+  // Some deletes may already have applied (irreversible) — return a structured
+  // report so the caller knows exactly what was removed before the abort.
   if (ctl.fatalStatus !== null) {
-    throw new Error(
-      `Keap auth failed (HTTP ${ctl.fatalStatus}) — aborting bulk delete. No further deletes attempted.`
-    );
+    const report: BulkDeleteReport = {
+      dry_run: false,
+      aborted: true,
+      fatal_status: ctl.fatalStatus,
+      attempted: deleted.length + failed.length,
+      total: ids.length,
+      ok: deleted.length,
+      fail: failed.length,
+      deleted,
+      failed: [
+        ...failed,
+        { id: -1, status: ctl.fatalStatus, error: `Keap auth failed (HTTP ${ctl.fatalStatus}) — batch aborted; remaining ids not attempted` },
+      ],
+    };
+    return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
   }
 
   const report: BulkDeleteReport = {

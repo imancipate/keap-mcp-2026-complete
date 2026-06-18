@@ -59,3 +59,43 @@ testing:
   note: "backend MCP tool — no UI; browser/E2E N/A. E2E done via real MCP protocol (stdio server + SDK client)."
 
 gates: []
+
+bugfix:
+  - id: "BUG-001"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "verified"
+    resolved_by: "CR-001"
+    note: "process-global limiter (single-instance); cross-instance deferred"
+    affects: ["FR-014"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-002"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "verified"
+    resolved_by: "CR-001"
+    affects: ["FR-013"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-003"
+    bucket: "spec-gap"
+    severity: "medium"
+    status: "verified"
+    resolved_by: "CR-001"
+    affects: ["FR-012"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+
+change_requests:
+  - id: "CR-001"
+    title: "Harden bulk-delete concurrency safety"
+    status: "accepted"
+    timestamp: "2026-06-18"
+    artifacts_affected: 4
+    tasks_added: 0
+    phase_rollback: "implement→verify→test_run (re-run in place)"
+    resolves: ["BUG-001", "BUG-002", "BUG-003"]
