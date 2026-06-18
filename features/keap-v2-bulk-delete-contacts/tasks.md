@@ -30,8 +30,9 @@
 | T-015 | Cross-instance limiter — `KeapRateLimiter` Durable Object + worker wiring + wrangler binding/migration; inject `acquire` through dispatchTool | §5.5 / FR-014 | `src/rate-limiter-do.ts`, `src/worker.ts`, `src/register.ts`, `wrangler.jsonc` | BUG-001 | [x] |
 | T-016 | CR-001 tests (fail-fast@concurrency>1, shared-limiter spacing, injected limiter; auth-fatal structured) | §5.5 | `bulk-tools.test.ts` (26 total) | — | [x] |
 
-## Not done (tracked)
-- T-017 | Deploy worker (`wrangler deploy`) + prove DO multi-isolate serialization under concurrent load | release | — | BUG-001 residual | [ ]
+## T-017 — deploy + prove DO (split)
+- T-017a | `wrangler deploy` to production | release | wrangler.jsonc (sqlite DO migration) | — | [x] DONE 2026-06-18, Version e4312d0e, https://keap-mcp.zeyadhq.workers.dev (verified live: /mcp → 401 OAuth gate) |
+- T-017b | Prove DO multi-isolate serialization under concurrent load on deployed /mcp | release | — | BUG-001 residual | [ ] BLOCKED: needs OAuth token (APPROVAL_SECRET to mint client + consent flow) |
 
 ## Non Production Elements
 None. Retroactive task ledger over already-implemented + committed work; T-017 is the only open (deploy) item, explicitly unchecked.

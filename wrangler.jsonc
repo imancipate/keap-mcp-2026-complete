@@ -20,7 +20,9 @@
     ]
   },
   "migrations": [
-    { "tag": "v1", "new_classes": ["KeapRateLimiter"] }
+    // SQLite-backed DO (required on the free plan; our limiter uses only in-memory
+    // state, so the storage backend is irrelevant to behavior).
+    { "tag": "v1", "new_sqlite_classes": ["KeapRateLimiter"] }
   ],
   "vars": {
     // Non-secret defaults. Secrets (KEAP_API_KEY, APPROVAL_SECRET) via `wrangler secret put`.
