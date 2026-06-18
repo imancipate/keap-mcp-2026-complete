@@ -25,5 +25,20 @@
 ### Decision notes
 User accepted all three now; limiter scope = process-global singleton (single-instance worker is the deploy target). Cross-instance (Durable Objects/KV) explicitly deferred — tracked in BUG-001 as residual scope.
 
+### Addendum 2026-06-18 — cross-instance limiter (was deferred)
+BUG-001's deferred residual (cross-INSTANCE rate coordination) is now implemented:
+- `src/rate-limiter-do.ts` — `KeapRateLimiter` Durable Object (single global id, atomic
+  slot reservation; correct primitive vs eventually-consistent KV).
+- `src/worker.ts` — `makeDoAcquire(env)` builds a DO-backed `acquire`, injected via
+  `dispatchTool(..., { acquire })`. DO class exported from the worker entry.
+- `src/register.ts` / `src/tools/bulk-tools.ts` — optional `acquire` threaded through;
+  stdio falls back to the process-global limiter.
+- `wrangler.jsonc` — `RATE_LIMITER` DO binding + `v1` migration.
+Verified: tsc clean, vitest 26/26 (added injected-limiter test), `wrangler deploy --dry-run`
+bundles with the DO binding. NOT yet proven: true multi-isolate serialization under deployed
+concurrent load (requires deploy).
+
 ### Non Production Elements
-None. Code changed + re-verified via real MCP E2E against live Keap.
+None. Code changed + re-verified via real MCP E2E against live Keap. The Durable Object's
+cross-isolate behavior is build-verified (dry-run) but its runtime multi-isolate property is
+unproven until deploy — explicitly labeled, not claimed.

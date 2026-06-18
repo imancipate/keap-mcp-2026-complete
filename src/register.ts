@@ -44,12 +44,19 @@ export function getAllTools(client: KeapClient): Tool[] {
 
 // Routes a tool call to the correct domain handler by name prefix/substring.
 // Mirrors the routing in src/server.ts exactly so both transports behave the same.
-export async function dispatchTool(name: string, args: any, client: KeapClient): Promise<any> {
+export async function dispatchTool(
+  name: string,
+  args: any,
+  client: KeapClient,
+  // CR-001/BUG-001: optional cross-instance rate limiter (Durable Object-backed),
+  // supplied by the Worker transport; stdio omits it and uses the process-global one.
+  opts?: { acquire?: () => Promise<void> }
+): Promise<any> {
   try {
     // Hand-written bulk helpers — exact-name match BEFORE the keap_v2_ prefix branch
     // (the name has no keap_v2_ prefix, but route explicitly so intent is unambiguous).
     if (name === 'keap_bulk_delete_contacts') {
-      return await handleBulkTool(name, args, client);
+      return await handleBulkTool(name, args, client, opts?.acquire);
     }
     // v2 generated tools route by exact-name map (deterministic — no substring collisions).
     if (name.startsWith('keap_v2_')) {

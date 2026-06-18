@@ -160,7 +160,12 @@ function errorMessage(err: any): string {
 
 export async function handleBulkDeleteContacts(
   args: any,
-  client: KeapClient
+  client: KeapClient,
+  // CR-001/BUG-001 (cross-instance): callers running on multiple worker isolates
+  // pass a shared limiter (Durable Object-backed) so the 25 req/s budget is
+  // enforced GLOBALLY. When omitted, falls back to the process-global limiter
+  // (correct for single-instance / stdio).
+  acquireOverride?: () => Promise<void>
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   const raw = args?.contact_ids;
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -199,7 +204,9 @@ export async function handleBulkDeleteContacts(
 
   // Audit log for a destructive bulk operation (goes to server stderr, not MCP output).
   console.error(`[keap_bulk_delete_contacts] executing: ${ids.length} unique ids, concurrency=${concurrency}, dry_run=false`);
-  const acquire = sharedAcquire; // CR-001/BUG-001: process-global, shared across calls
+  // CR-001/BUG-001: prefer an injected cross-instance limiter (DO-backed) when the
+  // worker provides one; otherwise the process-global limiter.
+  const acquire = acquireOverride ?? sharedAcquire;
   const deleted: number[] = [];
   const failed: BulkDeleteFailure[] = [];
   let cursor = 0;
@@ -275,10 +282,11 @@ export async function handleBulkDeleteContacts(
 export async function handleBulkTool(
   name: string,
   args: any,
-  client: KeapClient
+  client: KeapClient,
+  acquireOverride?: () => Promise<void>
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   if (name === 'keap_bulk_delete_contacts') {
-    return handleBulkDeleteContacts(args, client);
+    return handleBulkDeleteContacts(args, client, acquireOverride);
   }
   throw new Error(`Unknown bulk tool: ${name}`);
 }

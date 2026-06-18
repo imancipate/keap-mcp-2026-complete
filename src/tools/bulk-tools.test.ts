@@ -223,6 +223,20 @@ describe('keap_bulk_delete_contacts — shared rate limiter across calls (CR-001
   });
 });
 
+describe('keap_bulk_delete_contacts — injected cross-instance limiter (CR-001/BUG-001)', () => {
+  it('uses the injected acquire (DO-backed) once per delete instead of the process-global one', async () => {
+    const acquire = vi.fn(async () => {});
+    const deleteV2 = vi.fn(async () => {});
+    await handleBulkDeleteContacts(
+      { contact_ids: [1, 2, 3], concurrency: 2 },
+      fakeClient(deleteV2),
+      acquire
+    );
+    expect(acquire).toHaveBeenCalledTimes(3); // one lease per delete
+    expect(deleteV2).toHaveBeenCalledTimes(3);
+  });
+});
+
 describe('createRateLimiter (#R3 proactive guard)', () => {
   beforeEach(() => {
     vi.useFakeTimers();

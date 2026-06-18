@@ -23,6 +23,8 @@ for a destructive concurrent path). Resolved via **CR-001**: spec amended (FR-01
 FR-013/FR-014 added), code fixed in `src/tools/bulk-tools.ts`, 25/25 tests pass, real MCP E2E
 re-run against live Keap.
 
-**Residual (deferred to backlog):** BUG-001 cross-INSTANCE rate coordination (multiple worker
-isolates) needs Durable Objects / KV leasing. Current fix is process-global (single-instance),
-matching the deploy target.
+**Residual — now implemented (2026-06-18):** BUG-001 cross-INSTANCE coordination is built via a
+Durable Object (`src/rate-limiter-do.ts`, `KeapRateLimiter`), wired in `src/worker.ts` and
+injected through `dispatchTool`. tsc + 26/26 tests + `wrangler deploy --dry-run` pass. The only
+unproven aspect is true multi-isolate serialization under deployed concurrent load (requires
+deploy).

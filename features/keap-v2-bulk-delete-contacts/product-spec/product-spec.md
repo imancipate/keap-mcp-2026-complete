@@ -63,7 +63,7 @@ fallout, test-data teardown.
 | FR-011 | Accepts optional `dry_run: boolean` (default false); when true, validates + previews `would_delete[]` and issues NO deletes. | Must |
 | FR-012 | HTTP 401/403 is batch-fatal: stop immediately, regardless of `continue_on_error`. <!-- CR-001/BUG-003: --> Returns a STRUCTURED report (`aborted:true, fatal_status, attempted`, partial `deleted[]`/`failed[]`) instead of throwing, so callers see which irreversible deletes already applied. | Must |
 | FR-013 | <!-- CR-001/BUG-002 --> When `continue_on_error=false`, execution is serialized (`concurrency` forced to 1) so the batch deterministically stops on the first failure with no further deletes dispatched. | Must |
-| FR-014 | <!-- CR-001/BUG-001 --> The rate limiter is PROCESS-GLOBAL (shared across all concurrent invocations in a worker instance) so overlapping calls cannot collectively exceed Keap's 25 req/s/app limit on the shared credential. Cross-instance coordination (Durable Objects/KV) is out of scope. | Must |
+| FR-014 | <!-- CR-001/BUG-001 --> The rate limiter is PROCESS-GLOBAL (shared across all concurrent invocations in a worker instance). <!-- CR-001 addendum: --> Additionally, the Worker transport injects a CROSS-INSTANCE limiter backed by a Durable Object (`KeapRateLimiter`, single global id) so overlapping calls across worker isolates share one 25 req/s/app budget. stdio falls back to the process-global limiter. | Must |
 | FR-004 | Each ID deleted via existing single Keap v2 `DELETE /contacts/{id}` through `KeapClient`. | Must |
 | FR-005 | Fan-out runs at bounded concurrency; never unbounded `Promise.all` over all IDs. | Must |
 | FR-006 | On HTTP 429, retry the individual delete with backoff (bounded retries). | Must |

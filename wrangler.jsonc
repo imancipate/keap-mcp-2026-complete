@@ -13,6 +13,15 @@
       "id": "91c22d314f3d4fa397d36b3533ffa96e"
     }
   ],
+  // CR-001/BUG-001: global rate-limit lease shared across worker isolates.
+  "durable_objects": {
+    "bindings": [
+      { "name": "RATE_LIMITER", "class_name": "KeapRateLimiter" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_classes": ["KeapRateLimiter"] }
+  ],
   "vars": {
     // Non-secret defaults. Secrets (KEAP_API_KEY, APPROVAL_SECRET) via `wrangler secret put`.
   }

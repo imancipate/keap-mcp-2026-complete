@@ -14,6 +14,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { KeapClient } from './clients/keap.js';
 import { getAllTools, dispatchTool } from './register.js';
+import { KeapRateLimiter } from './rate-limiter-do.js';
+
+// Durable Object class must be exported from the worker entry module.
+export { KeapRateLimiter };
 
 export interface Env {
   // Secrets (wrangler secret put ...)
@@ -23,12 +27,27 @@ export interface Env {
   // Bindings
   OAUTH_KV: KVNamespace;
   OAUTH_PROVIDER: any;
+  // CR-001/BUG-001: global rate-limit lease shared across worker isolates.
+  RATE_LIMITER: DurableObjectNamespace;
+}
+
+// CR-001/BUG-001: build a cross-instance limiter backed by the single global DO.
+// Returns an acquire() the bulk-delete handler awaits before each delete; the DO
+// reserves the next slot atomically and returns how long to wait.
+function makeDoAcquire(env: Env): () => Promise<void> {
+  const stub = env.RATE_LIMITER.get(env.RATE_LIMITER.idFromName('keap-global'));
+  return async () => {
+    const res = await stub.fetch('https://do.invalid/acquire?rps=10');
+    const { wait } = (await res.json()) as { wait: number };
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  };
 }
 
 // Build a fresh MCP server per request, wired to the same tool registry the
 // stdio server uses. Low-level request handlers keep parity with src/server.ts.
 function createKeapMcpServer(env: Env): McpServer {
   const client = new KeapClient(env.KEAP_ACCESS_TOKEN, env.KEAP_API_KEY);
+  const acquire = makeDoAcquire(env);
   const mcp = new McpServer(
     { name: 'keap-mcp-server', version: '1.0.0' },
     { capabilities: { tools: {} } }
@@ -36,7 +55,7 @@ function createKeapMcpServer(env: Env): McpServer {
   const low = mcp.server;
   low.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: getAllTools(client) }));
   low.setRequestHandler(CallToolRequestSchema, async (request) =>
-    dispatchTool(request.params.name, request.params.arguments, client)
+    dispatchTool(request.params.name, request.params.arguments, client, { acquire })
   );
   return mcp;
 }
