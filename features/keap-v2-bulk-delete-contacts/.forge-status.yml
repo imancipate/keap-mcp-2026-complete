@@ -68,7 +68,7 @@ bugfix:
     severity: "high"
     status: "verified"
     resolved_by: "CR-001"
-    note: "process-global + cross-instance Durable Object limiter; build-verified (dry-run), runtime multi-isolate proof pending deploy"
+    note: "process-global + cross-instance Durable Object limiter; DEPLOYED + proven on prod (T-017b): 3 concurrent calls serialized by shared DO budget (2.15x single). Version e4312d0e"
     affects: ["FR-014"]
     source: "codex-adversarial-review"
     timestamp: "2026-06-18"
