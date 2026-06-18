@@ -21,7 +21,10 @@ import { createAffiliatesTools, handleAffiliatesTool } from './tools/affiliates-
 import { createV2Tools, handleV2Tool } from './tools/v2-generated-tools.js';
 import { createBulkTools, handleBulkTool } from './tools/bulk-tools.js';
 
-export function getAllTools(client: KeapClient): Tool[] {
+// CR-002/BUG-005: the destructive bulk-delete tool is OPT-IN. It registers + dispatches
+// only when explicitly enabled (env KEAP_BULK_DELETE_ENABLED=true), so existing OAuth
+// clients do not silently inherit an irreversible delete primitive.
+export function getAllTools(client: KeapClient, opts?: { bulkDeleteEnabled?: boolean }): Tool[] {
   return [
     ...createContactsTools(client),
     ...createCompaniesTools(client),
@@ -38,7 +41,7 @@ export function getAllTools(client: KeapClient): Tool[] {
     ...createSettingsTools(client),
     ...createAffiliatesTools(client),
     ...createV2Tools(client),
-    ...createBulkTools(client),
+    ...(opts?.bulkDeleteEnabled ? createBulkTools(client) : []),
   ];
 }
 
@@ -50,12 +53,17 @@ export async function dispatchTool(
   client: KeapClient,
   // CR-001/BUG-001: optional cross-instance rate limiter (Durable Object-backed),
   // supplied by the Worker transport; stdio omits it and uses the process-global one.
-  opts?: { acquire?: () => Promise<void> }
+  opts?: { acquire?: () => Promise<void>; bulkDeleteEnabled?: boolean }
 ): Promise<any> {
   try {
     // Hand-written bulk helpers — exact-name match BEFORE the keap_v2_ prefix branch
     // (the name has no keap_v2_ prefix, but route explicitly so intent is unambiguous).
     if (name === 'keap_bulk_delete_contacts') {
+      // CR-002/BUG-005: refuse the destructive tool unless explicitly enabled, even if
+      // a client somehow learned the name while it was unregistered.
+      if (!opts?.bulkDeleteEnabled) {
+        throw new Error('keap_bulk_delete_contacts is disabled (set KEAP_BULK_DELETE_ENABLED=true to enable).');
+      }
       return await handleBulkTool(name, args, client, opts?.acquire);
     }
     // v2 generated tools route by exact-name map (deterministic — no substring collisions).

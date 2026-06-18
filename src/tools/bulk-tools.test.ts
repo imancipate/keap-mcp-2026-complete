@@ -6,6 +6,7 @@ import {
   _resetSharedLimiterForTests,
 } from './bulk-tools.js';
 import type { KeapClient } from '../clients/keap.js';
+import { getAllTools, dispatchTool } from '../register.js';
 
 // A minimal fake KeapClient exposing only deleteV2 (the sole method the handler uses).
 function fakeClient(deleteV2: any): KeapClient {
@@ -234,6 +235,36 @@ describe('keap_bulk_delete_contacts — injected cross-instance limiter (CR-001/
     );
     expect(acquire).toHaveBeenCalledTimes(3); // one lease per delete
     expect(deleteV2).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('keap_bulk_delete_contacts — kill-switch gate (CR-002/BUG-005)', () => {
+  it('is NOT registered by default and IS registered when enabled', () => {
+    const off = getAllTools(fakeClient(vi.fn())).map((t) => t.name);
+    expect(off).not.toContain('keap_bulk_delete_contacts');
+    const on = getAllTools(fakeClient(vi.fn()), { bulkDeleteEnabled: true }).map((t) => t.name);
+    expect(on).toContain('keap_bulk_delete_contacts');
+  });
+
+  it('dispatch refuses the tool when disabled (isError), even if the name is known', async () => {
+    const deleteV2 = vi.fn();
+    const res = await dispatchTool('keap_bulk_delete_contacts', { contact_ids: [1] }, fakeClient(deleteV2));
+    expect(res.isError).toBe(true);
+    expect(res.content[0].text).toMatch(/disabled/i);
+    expect(deleteV2).not.toHaveBeenCalled();
+  });
+
+  it('dispatch runs the tool when enabled', async () => {
+    const deleteV2 = vi.fn(async () => {});
+    const res = await dispatchTool(
+      'keap_bulk_delete_contacts',
+      { contact_ids: [1, 2] },
+      fakeClient(deleteV2),
+      { bulkDeleteEnabled: true, acquire: async () => {} }
+    );
+    const report = JSON.parse(res.content[0].text);
+    expect(report.ok).toBe(2);
+    expect(deleteV2).toHaveBeenCalledTimes(2);
   });
 });
 

@@ -15,7 +15,8 @@ async function main() {
   const transport = new StdioClientTransport({
     command: 'npx',
     args: ['tsx', 'src/main.ts'],
-    env: { ...process.env, KEAP_API_KEY: process.env.KEAP_API_KEY || '' },
+    // CR-002/BUG-005: the destructive tool is opt-in; enable it for this E2E run.
+    env: { ...process.env, KEAP_API_KEY: process.env.KEAP_API_KEY || '', KEAP_BULK_DELETE_ENABLED: 'true' },
   });
   const client = new Client({ name: 'forge-e2e', version: '1.0.0' }, { capabilities: {} });
   await client.connect(transport);

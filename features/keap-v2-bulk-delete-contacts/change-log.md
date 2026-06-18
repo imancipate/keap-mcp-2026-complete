@@ -42,3 +42,25 @@ concurrent load (requires deploy).
 None. Code changed + re-verified via real MCP E2E against live Keap. The Durable Object's
 cross-isolate behavior is build-verified (dry-run) but its runtime multi-isolate property is
 unproven until deploy — explicitly labeled, not claimed.
+
+## CR-002: Close No-ship conditions from round-2 adversarial review — 2026-06-18
+
+| Field | Value |
+|-------|-------|
+| Status | ACCEPTED (A+B+C+D) |
+| Source | Codex adversarial review of release-readiness (BUG-004/005/006 + CF-4) |
+| Impact | src/clients/keap.ts, src/register.ts, src/worker.ts, src/server.ts, scripts; spec FRs |
+
+### Sub-changes
+| Bug | Change | FR | Files |
+|-----|--------|----|----|
+| BUG-006 (A) | Default 30s timeout moved OFF `requestV2` (was global to all 343 v2 tools) ONTO `deleteV2` only | FR-014 (timeout note) | keap.ts |
+| BUG-005 (B) | `keap_bulk_delete_contacts` is opt-in: `getAllTools`/`dispatchTool` gate on `KEAP_BULK_DELETE_ENABLED` (default OFF in prod); both transports wired | FR-015 (new) | register.ts, worker.ts, server.ts |
+| BUG-004 (C) | `/admin/mint-client` reads secret from `x-approval-secret` header, rejects query-string; scripts updated; APPROVAL_SECRET rotated + test client revoked (ops) | FR-016 (new) | worker.ts, scripts |
+| CF-4 (D) | Merge PR #3 + redeploy from merged base so prod == reviewed code | — | process |
+
+### Verification
+tsc clean; vitest 29/29 (+3 kill-switch tests). Deploy + prod re-verify recorded below as performed.
+
+### Non Production Elements
+None. The leftover test OAuth client is being revoked as part of C.

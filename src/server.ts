@@ -49,8 +49,11 @@ export class KeapServer {
     });
   }
 
+  private bulkDeleteEnabled = process.env.KEAP_BULK_DELETE_ENABLED === 'true';
+
   private registerTools(): void {
-    this.allTools = getAllTools(this.client);
+    // CR-002/BUG-005: destructive bulk-delete opt-in via env (default off).
+    this.allTools = getAllTools(this.client, { bulkDeleteEnabled: this.bulkDeleteEnabled });
     console.error(`[Keap MCP] Registered ${this.allTools.length} tools`);
   }
 
@@ -64,7 +67,7 @@ export class KeapServer {
     // routing + its own error envelope).
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      return dispatchTool(name, args, this.client);
+      return dispatchTool(name, args, this.client, { bulkDeleteEnabled: this.bulkDeleteEnabled });
     });
   }
 

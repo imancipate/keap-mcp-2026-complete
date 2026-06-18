@@ -138,11 +138,11 @@ export class KeapClient {
 
   // V2 API support (some endpoints use v2)
   async requestV2<T>(config: AxiosRequestConfig): Promise<T> {
+    // CR-002/BUG-006: NO global default timeout here. Injecting one applied a hard
+    // 30s cap to all 343 generated v2 tools (incl. slow export/search), hard-failing
+    // calls that legitimately ran longer. Timeout is now opt-in per caller (deleteV2
+    // sets its own); requestV2 only forwards what the caller provides.
     const v2Config = {
-      // Default a request timeout so a stuck call can't hang a caller forever.
-      // The raw axios.request path below does NOT inherit `this.client`'s 30s
-      // timeout, so set it explicitly. Callers may override via config.
-      timeout: 30000,
       ...config,
       baseURL: 'https://api.infusionsoft.com/crm/rest/v2',
     };
@@ -174,6 +174,8 @@ export class KeapClient {
   }
 
   async deleteV2<T>(path: string, opts?: { timeout?: number; signal?: AbortSignal }): Promise<T> {
-    return this.requestV2<T>({ method: 'DELETE', url: path, ...opts });
+    // CR-002/BUG-006: the 30s default lives HERE (the destructive bulk-delete path),
+    // not globally on requestV2. Caller opts override.
+    return this.requestV2<T>({ method: 'DELETE', url: path, timeout: 30000, ...opts });
   }
 }

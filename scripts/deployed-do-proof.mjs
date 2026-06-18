@@ -14,10 +14,9 @@ const b64url = (buf) => buf.toString('base64').replace(/\+/g, '-').replace(/\//g
 
 async function mintClient() {
   const u = new URL(BASE + '/admin/mint-client');
-  u.searchParams.set('secret', SECRET);
   u.searchParams.set('redirect', REDIRECT);
   u.searchParams.set('name', 'do-proof');
-  const r = await fetch(u, { method: 'POST' });
+  const r = await fetch(u, { method: 'POST', headers: { 'x-approval-secret': SECRET } });
   if (!r.ok) throw new Error(`mint-client ${r.status}: ${await r.text()}`);
   return r.json();
 }

@@ -99,24 +99,30 @@ bugfix:
   - id: "BUG-004"
     bucket: "spec-gap"
     severity: "high"
-    status: "reported"
-    affects: ["worker.ts", "scripts"]
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "secret via x-approval-secret header (worker + scripts); rotate+revoke = ops step"
+    affects: ["FR-016"]
     source: "codex-adversarial-review-2"
     timestamp: "2026-06-18"
     superseded: false
   - id: "BUG-005"
     bucket: "spec-gap"
     severity: "high"
-    status: "reported"
-    affects: ["register.ts"]
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "KEAP_BULK_DELETE_ENABLED gate default-off; both transports; 29/29 tests"
+    affects: ["FR-015"]
     source: "codex-adversarial-review-2"
     timestamp: "2026-06-18"
     superseded: false
   - id: "BUG-006"
     bucket: "spec-gap"
     severity: "high"
-    status: "reported"
-    affects: ["keap.ts"]
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "30s default moved off requestV2 (all 343) onto deleteV2 only"
+    affects: ["FR-014"]
     source: "codex-adversarial-review-2"
     timestamp: "2026-06-18"
     superseded: false
@@ -137,3 +143,11 @@ change_requests:
     tasks_added: 0
     phase_rollback: "implement→verify→test_run (re-run in place)"
     resolves: ["BUG-001", "BUG-002", "BUG-003"]
+  - id: "CR-002"
+    title: "Close No-ship conditions (timeout scope, kill-switch, secret transport, merge)"
+    status: "accepted"
+    timestamp: "2026-06-18"
+    artifacts_affected: 5
+    tasks_added: 0
+    phase_rollback: "implement→verify (re-run in place) + merge/redeploy"
+    resolves: ["BUG-004", "BUG-005", "BUG-006", "CF-4"]

@@ -24,6 +24,8 @@ export interface Env {
   KEAP_API_KEY?: string;
   KEAP_ACCESS_TOKEN?: string;
   APPROVAL_SECRET: string;
+  // CR-002/BUG-005: destructive bulk-delete is opt-in. Default OFF.
+  KEAP_BULK_DELETE_ENABLED?: string;
   // Bindings
   OAUTH_KV: KVNamespace;
   OAUTH_PROVIDER: any;
@@ -48,14 +50,15 @@ function makeDoAcquire(env: Env): () => Promise<void> {
 function createKeapMcpServer(env: Env): McpServer {
   const client = new KeapClient(env.KEAP_ACCESS_TOKEN, env.KEAP_API_KEY);
   const acquire = makeDoAcquire(env);
+  const bulkDeleteEnabled = env.KEAP_BULK_DELETE_ENABLED === 'true';
   const mcp = new McpServer(
     { name: 'keap-mcp-server', version: '1.0.0' },
     { capabilities: { tools: {} } }
   );
   const low = mcp.server;
-  low.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: getAllTools(client) }));
+  low.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: getAllTools(client, { bulkDeleteEnabled }) }));
   low.setRequestHandler(CallToolRequestSchema, async (request) =>
-    dispatchTool(request.params.name, request.params.arguments, client, { acquire })
+    dispatchTool(request.params.name, request.params.arguments, client, { acquire, bulkDeleteEnabled })
   );
   return mcp;
 }
@@ -97,7 +100,12 @@ const AuthHandler = {
     //   body (form or query): secret=<APPROVAL_SECRET>&redirect=<callback>&name=<label>
     if (url.pathname === '/admin/mint-client' && request.method === 'POST') {
       const params = url.searchParams;
-      const secret = params.get('secret') || '';
+      // CR-002/BUG-004: admin secret must NOT travel in the query string (leaks to
+      // logs/history/observability). Read it from a header; reject query-string use.
+      if (params.get('secret')) {
+        return new Response('Pass the secret in the x-approval-secret header, not the query string.', { status: 400 });
+      }
+      const secret = request.headers.get('x-approval-secret') || '';
       const expected = env.APPROVAL_SECRET || '';
       if (!expected || secret.length !== expected.length || secret !== expected) {
         return new Response('Forbidden', { status: 403 });

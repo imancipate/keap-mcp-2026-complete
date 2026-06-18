@@ -10,8 +10,8 @@ const b64url = (b) => b.toString('base64').replace(/\+/g,'-').replace(/\//g,'_')
 
 async function token() {
   const u = new URL(BASE + '/admin/mint-client');
-  u.searchParams.set('secret', SECRET); u.searchParams.set('redirect', REDIRECT); u.searchParams.set('name', 'regression-check');
-  const c = await (await fetch(u, { method: 'POST' })).json();
+  u.searchParams.set('redirect', REDIRECT); u.searchParams.set('name', 'regression-check');
+  const c = await (await fetch(u, { method: 'POST', headers: { 'x-approval-secret': SECRET } })).json();
   const v = b64url(randomBytes(32)); const ch = b64url(createHash('sha256').update(v).digest());
   const au = new URL(BASE + '/authorize');
   au.searchParams.set('response_type','code'); au.searchParams.set('client_id',c.clientId);
