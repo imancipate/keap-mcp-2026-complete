@@ -42,6 +42,11 @@ phases:
     digest_path: "implementation-log.md"
   code_review:
     status: "not_applicable"
+  release_readiness:
+    status: "completed"
+    digest_path: "release-readiness.md"
+    verdict: "conditionally_ready"
+    note: "no regression proven on live deploy (456 tools/343 v2 intact + existing read tools work); conditions: merge PR, kill-switch decision, DO scale, cleanup test client"
   verify:
     status: "completed"
     digest_path: "verify-report.md"
