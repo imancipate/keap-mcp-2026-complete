@@ -237,6 +237,41 @@ Framework: match existing tests (`*.test.ts` — same runner as `schema-contract
 - **Destructive** — no dry-run in v1; tests use mocks; the single real run in verify uses
   disposable contacts only.
 
+## 5.5. CR-001 Amendments (2026-06-18) — supersede earlier design decisions
+
+Codex adversarial review (post-implement) surfaced 3 spec-gaps; CR-001 (see
+[change-log.md](./change-log.md), [bugs/](./bugs/)) amended the design. The original
+text above is preserved; the decisions below supersede it where they conflict.
+
+- **BUG-001 / FR-014 — limiter scope.** ~~Per-invocation `createRateLimiter(MAX_RPS)`
+  inside the handler (plan §1A/§2.2 step 4).~~ → SUPERSEDED. Now a **process-global**
+  limiter (`sharedAcquire` over module-scope `_sharedNext`) shared across all calls in an
+  isolate, PLUS an injected **cross-instance** limiter backed by a Durable Object
+  (`src/rate-limiter-do.ts` `KeapRateLimiter`, single global id) supplied by the Worker via
+  `dispatchTool(..., {acquire})`. stdio uses the process-global fallback.
+- **BUG-002 / FR-013 — fail-fast.** ~~`continue_on_error=false` stops scheduling new
+  deletes; in-flight finish (plan §2.2 step 6).~~ → SUPERSEDED. Now forces
+  `concurrency=1` when `continue_on_error=false` → deterministic fail-fast, no extra
+  deletes after the first failure.
+- **BUG-003 / FR-012 — auth-fatal.** ~~On 401/403 `throw` a single auth error (plan §2.2
+  step 5).~~ → SUPERSEDED. Now RETURNS a structured report
+  `{aborted, fatal_status, attempted, deleted, failed}` so callers see which irreversible
+  deletes already applied.
+
+### CR-001 edit plan (files actually touched)
+- `src/tools/bulk-tools.ts` — process-global `sharedAcquire`, `_resetSharedLimiterForTests`,
+  optional injected `acquire`, `concurrency=1` on fail-fast, structured auth-fatal return.
+- `src/rate-limiter-do.ts` (NEW) — `KeapRateLimiter` Durable Object.
+- `src/worker.ts` — `makeDoAcquire`, inject acquire, export DO class.
+- `src/register.ts` — `dispatchTool` optional `{acquire}` opts.
+- `wrangler.jsonc` — `RATE_LIMITER` DO binding + `v1` migration.
+- `src/tools/bulk-tools.test.ts` — +fail-fast@concurrency>1, +shared-limiter spacing,
+  +injected-limiter; auth-fatal rewritten to assert structured return. (26 tests.)
+
+### CR-001 verification
+tsc clean; vitest 26/26; live MCP E2E re-run (create→delete→404); `wrangler deploy --dry-run`
+bundles the DO. Unproven: multi-isolate DO serialization under deployed concurrent load.
+
 ## 6. Out-of-scope tech debt (logged, not fixed here)
 - **`KeapClient` v2 rate-limit tracking is broken** (§1A): it reads `x-rate-limit-*` headers
   that Keap v2 doesn't send, so `checkRateLimit()` is inert for v2 across ALL 343 generated
