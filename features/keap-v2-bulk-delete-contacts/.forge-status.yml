@@ -1,0 +1,153 @@
+schema_version: 3
+feature: "keap-v2-bulk-delete-contacts"
+created_at: "2026-06-17"
+last_updated: "2026-06-17T00:00:00Z"
+feature_mode: "lite"
+backfilled: false
+v2_native: true
+speckit_mode: "classic"
+
+workspace:
+  status: "active"
+  worktree: ".worktrees/feat-keap-v2-bulk-delete-contacts"
+  branch: "feat/keap-v2-bulk-delete-contacts"
+  base_ref: "feat/keap-v2-remote-worker"
+
+phases:
+  problem_discovery:
+    status: "skipped"
+    skipped: true
+    skip_reason: "Need already validated by user in conversation; bulk-delete gap confirmed against Keap v2 API (only emails:batchRemove exists; no contact bulk delete)."
+  research:
+    status: "not_applicable"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  revalidation:
+    status: "not_applicable"
+  bridge:
+    status: "not_applicable"
+  plan:
+    status: "completed"
+    digest_path: "plan.md"
+    adversarial_review: "adversarial-review.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks.md"
+    note: "lite no longer skips tasks.md (policy directive 2026-06-18); generated retroactively for plan↔tasks↔code traceability"
+  pre_impl_review:
+    status: "not_applicable"
+  implement:
+    status: "completed"
+    digest_path: "implementation-log.md"
+  code_review:
+    status: "not_applicable"
+  release_readiness:
+    status: "completed"
+    digest_path: "release-readiness.md"
+    verdict: "conditionally_ready"
+    note: "no regression proven on live deploy (456 tools/343 v2 intact + existing read tools work); conditions: merge PR, kill-switch decision, DO scale, cleanup test client"
+  verify:
+    status: "completed"
+    digest_path: "verify-report.md"
+    runtime_evidence: "live Keap create→bulk-delete→404-confirm passed 2026-06-18"
+  test_plan:
+    status: "completed"
+    digest_path: "testing/test-plan.md"
+  test_run:
+    status: "completed"
+    digest_path: "test-report.md"
+    e2e_evidence: "MCP tools/list+tools/call against live Keap; create→bulk-delete→404 confirmed 2026-06-18"
+
+testing:
+  types: [unit, contract, integration, e2e-mcp]
+  test_case_count: 21
+  playwright_files: 0
+  note: "backend MCP tool — no UI; browser/E2E N/A. E2E done via real MCP protocol (stdio server + SDK client)."
+
+gates: []
+
+bugfix:
+  - id: "BUG-001"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "verified"
+    resolved_by: "CR-001"
+    note: "process-global + cross-instance Durable Object limiter; DEPLOYED + proven on prod (T-017b): 3 concurrent calls serialized by shared DO budget (2.15x single). Version e4312d0e"
+    affects: ["FR-014"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-002"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "verified"
+    resolved_by: "CR-001"
+    affects: ["FR-013"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-003"
+    bucket: "spec-gap"
+    severity: "medium"
+    status: "verified"
+    resolved_by: "CR-001"
+    affects: ["FR-012"]
+    source: "codex-adversarial-review"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-004"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "secret via x-approval-secret header (worker + scripts); rotate+revoke = ops step"
+    affects: ["FR-016"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-005"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "KEAP_BULK_DELETE_ENABLED gate default-off; both transports; 29/29 tests"
+    affects: ["FR-015"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
+  - id: "BUG-006"
+    bucket: "spec-gap"
+    severity: "high"
+    status: "patched"
+    resolved_by: "CR-002"
+    note: "30s default moved off requestV2 (all 343) onto deleteV2 only"
+    affects: ["FR-014"]
+    source: "codex-adversarial-review-2"
+    timestamp: "2026-06-18"
+    superseded: false
+
+sync_runs:
+  last_run: "2026-06-18"
+  total_runs: 1
+  last_drift_count: 1
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"
+
+change_requests:
+  - id: "CR-001"
+    title: "Harden bulk-delete concurrency safety"
+    status: "accepted"
+    timestamp: "2026-06-18"
+    artifacts_affected: 4
+    tasks_added: 0
+    phase_rollback: "implement→verify→test_run (re-run in place)"
+    resolves: ["BUG-001", "BUG-002", "BUG-003"]
+  - id: "CR-002"
+    title: "Close No-ship conditions (timeout scope, kill-switch, secret transport, merge)"
+    status: "accepted"
+    timestamp: "2026-06-18"
+    artifacts_affected: 5
+    tasks_added: 0
+    phase_rollback: "implement→verify (re-run in place) + merge/redeploy"
+    resolves: ["BUG-004", "BUG-005", "BUG-006", "CF-4"]
