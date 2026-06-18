@@ -32,7 +32,9 @@ phases:
     digest_path: "plan.md"
     adversarial_review: "adversarial-review.md"
   tasks:
-    status: "not_applicable"
+    status: "completed"
+    digest_path: "tasks.md"
+    note: "lite no longer skips tasks.md (policy directive 2026-06-18); generated retroactively for plan↔tasks↔code traceability"
   pre_impl_review:
     status: "not_applicable"
   implement:
@@ -89,6 +91,13 @@ bugfix:
     source: "codex-adversarial-review"
     timestamp: "2026-06-18"
     superseded: false
+
+sync_runs:
+  last_run: "2026-06-18"
+  total_runs: 1
+  last_drift_count: 1
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"
 
 change_requests:
   - id: "CR-001"
