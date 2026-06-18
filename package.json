@@ -18,7 +18,9 @@
     "predeploy": "vitest run",
     "deploy": "wrangler deploy",
     "worker:deploy": "npm run predeploy && wrangler deploy",
-    "prepublishOnly": "npm run test:run && npm run build"
+    "prepublishOnly": "npm run test:run && npm run build",
+    "verify:e2e": "tsx scripts/e2e-mcp-bulk-delete.ts",
+    "verify:deployed": "tsx scripts/deployed-do-proof.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^0.7.2",
