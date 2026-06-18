@@ -12,3 +12,6 @@ dist/
 .claude/
 .DS_Store
 *.log
+.worktrees/
+.specify/
+.product-forge/
