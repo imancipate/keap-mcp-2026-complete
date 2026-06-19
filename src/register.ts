@@ -53,7 +53,7 @@ export async function dispatchTool(
   client: KeapClient,
   // CR-001/BUG-001: optional cross-instance rate limiter (Durable Object-backed),
   // supplied by the Worker transport; stdio omits it and uses the process-global one.
-  opts?: { acquire?: () => Promise<void>; bulkDeleteEnabled?: boolean }
+  opts?: { acquire?: () => Promise<void>; bulkDeleteEnabled?: boolean; confirmToken?: string }
 ): Promise<any> {
   try {
     // Hand-written bulk helpers — exact-name match BEFORE the keap_v2_ prefix branch
@@ -64,7 +64,8 @@ export async function dispatchTool(
       if (!opts?.bulkDeleteEnabled) {
         throw new Error('keap_bulk_delete_contacts is disabled (set KEAP_BULK_DELETE_ENABLED=true to enable).');
       }
-      return await handleBulkTool(name, args, client, opts?.acquire);
+      // CR-003/FR-017: pass the server confirm token; the handler enforces the gate.
+      return await handleBulkTool(name, args, client, opts?.acquire, opts?.confirmToken);
     }
     // v2 generated tools route by exact-name map (deterministic — no substring collisions).
     if (name.startsWith('keap_v2_')) {

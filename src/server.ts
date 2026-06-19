@@ -50,6 +50,7 @@ export class KeapServer {
   }
 
   private bulkDeleteEnabled = process.env.KEAP_BULK_DELETE_ENABLED === 'true';
+  private confirmToken = process.env.KEAP_BULK_DELETE_CONFIRM; // CR-003/FR-017
 
   private registerTools(): void {
     // CR-002/BUG-005: destructive bulk-delete opt-in via env (default off).
@@ -67,7 +68,7 @@ export class KeapServer {
     // routing + its own error envelope).
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      return dispatchTool(name, args, this.client, { bulkDeleteEnabled: this.bulkDeleteEnabled });
+      return dispatchTool(name, args, this.client, { bulkDeleteEnabled: this.bulkDeleteEnabled, confirmToken: this.confirmToken });
     });
   }
 

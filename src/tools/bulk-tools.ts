@@ -41,6 +41,27 @@ export interface BulkDeleteReport {
   attempted?: number;
 }
 
+// REV-002: batch-level error sentinel (not a real contact id) for the `failed[]` list
+// when the whole batch is refused/aborted before/around per-id work.
+const BATCH_ERROR_ID = -1;
+
+// REV-001: single MCP-content wrapper + report factory (was duplicated 4×).
+function wrap(report: BulkDeleteReport): { content: Array<{ type: string; text: string }> } {
+  return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+}
+function makeReport(p: Partial<BulkDeleteReport> & { total: number }): BulkDeleteReport {
+  return { dry_run: false, ok: 0, fail: 0, deleted: [], failed: [], ...p };
+}
+
+// REV-003: constant-time string compare for the confirm token (avoid timing side-channel).
+// Pure JS (no node:crypto) so it runs unchanged on the Cloudflare Worker runtime.
+function safeEqual(a?: string, b?: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export function createBulkTools(_client: KeapClient): Tool[] {
   return [
     {
@@ -71,6 +92,13 @@ export function createBulkTools(_client: KeapClient): Tool[] {
           dry_run: {
             type: 'boolean',
             description: 'Preview only — validate IDs and report would_delete, delete nothing. Default false.',
+          },
+          confirm: {
+            type: 'string',
+            description:
+              'REQUIRED to actually delete (CR-003/FR-017): must equal the server confirm token ' +
+              '(env KEAP_BULK_DELETE_CONFIRM), which a human supplies per batch. Omit/wrong = refused. ' +
+              'Not needed for dry_run.',
           },
         },
         required: ['contact_ids'],
@@ -165,7 +193,10 @@ export async function handleBulkDeleteContacts(
   // pass a shared limiter (Durable Object-backed) so the 25 req/s budget is
   // enforced GLOBALLY. When omitted, falls back to the process-global limiter
   // (correct for single-instance / stdio).
-  acquireOverride?: () => Promise<void>
+  acquireOverride?: () => Promise<void>,
+  // CR-003/FR-017: the server confirm token. A real delete runs only if args.confirm
+  // matches it. undefined/'' means the gate is unconfigured → default-deny.
+  expectedConfirm?: string
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   const raw = args?.contact_ids;
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -190,16 +221,24 @@ export async function handleBulkDeleteContacts(
   if (!continueOnError) concurrency = 1;
 
   if (dryRun) {
-    const report: BulkDeleteReport = {
-      dry_run: true,
-      total: ids.length,
-      ok: 0,
-      fail: 0,
-      deleted: [],
-      failed: [],
-      would_delete: ids,
-    };
-    return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+    return wrap(makeReport({ dry_run: true, total: ids.length, would_delete: ids }));
+  }
+
+  // CR-003/FR-017: human-confirm gate. dry_run already returned above (preview is exempt).
+  // A real delete proceeds ONLY if the caller's confirm matches the server token. Default-deny
+  // when the token is unset. Protects against an autonomous LLM self-authorizing deletes.
+  if (!safeEqual(args?.confirm, expectedConfirm)) {
+    console.error(`[keap_bulk_delete_contacts] REFUSED: confirm gate (${ids.length} ids not deleted)`);
+    return wrap(
+      makeReport({
+        aborted: true,
+        attempted: 0,
+        total: ids.length,
+        failed: [
+          { id: BATCH_ERROR_ID, status: null, error: 'confirm-required: missing or incorrect confirm token — no deletes performed (CR-003/FR-017). A human must supply the server confirm token.' },
+        ],
+      })
+    );
   }
 
   // Audit log for a destructive bulk operation (goes to server stderr, not MCP output).
@@ -251,42 +290,37 @@ export async function handleBulkDeleteContacts(
   // Some deletes may already have applied (irreversible) — return a structured
   // report so the caller knows exactly what was removed before the abort.
   if (ctl.fatalStatus !== null) {
-    const report: BulkDeleteReport = {
-      dry_run: false,
-      aborted: true,
-      fatal_status: ctl.fatalStatus,
-      attempted: deleted.length + failed.length,
-      total: ids.length,
-      ok: deleted.length,
-      fail: failed.length,
-      deleted,
-      failed: [
-        ...failed,
-        { id: -1, status: ctl.fatalStatus, error: `Keap auth failed (HTTP ${ctl.fatalStatus}) — batch aborted; remaining ids not attempted` },
-      ],
-    };
-    return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+    return wrap(
+      makeReport({
+        aborted: true,
+        fatal_status: ctl.fatalStatus,
+        attempted: deleted.length + failed.length,
+        total: ids.length,
+        ok: deleted.length,
+        fail: failed.length,
+        deleted,
+        failed: [
+          ...failed,
+          { id: BATCH_ERROR_ID, status: ctl.fatalStatus, error: `Keap auth failed (HTTP ${ctl.fatalStatus}) — batch aborted; remaining ids not attempted` },
+        ],
+      })
+    );
   }
 
-  const report: BulkDeleteReport = {
-    dry_run: false,
-    total: ids.length,
-    ok: deleted.length,
-    fail: failed.length,
-    deleted,
-    failed,
-  };
-  return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+  return wrap(
+    makeReport({ total: ids.length, ok: deleted.length, fail: failed.length, deleted, failed })
+  );
 }
 
 export async function handleBulkTool(
   name: string,
   args: any,
   client: KeapClient,
-  acquireOverride?: () => Promise<void>
+  acquireOverride?: () => Promise<void>,
+  expectedConfirm?: string
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   if (name === 'keap_bulk_delete_contacts') {
-    return handleBulkDeleteContacts(args, client, acquireOverride);
+    return handleBulkDeleteContacts(args, client, acquireOverride, expectedConfirm);
   }
   throw new Error(`Unknown bulk tool: ${name}`);
 }

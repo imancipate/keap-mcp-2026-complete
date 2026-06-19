@@ -61,6 +61,22 @@ real `KeapClient` (KEAP_API_KEY present at repo root) →
 → (c) confirm each returns 204/deleted in the report → (d) re-fetch each → expect 404 gone.
 Plus a known-nonexistent-id call to confirm the 404→failed path on live Keap.
 
+## Phase 7 re-verify — CR-003 confirm-gate (FR-017), 2026-06-18
+Traceability (full chain): product-spec ✅ → spec.md ✅ → plan §5.6 ✅ → tasks T-024/025/026 ✅ →
+code ✅ (gate `safeEqual`/`expectedConfirm`/`confirmToken`, 11 refs across bulk-tools/register/worker/server)
+→ tests ✅ (AC-1..5 + token-unset). 35/35 vitest, tsc clean.
+
+Runtime evidence (test-truth labels):
+- Refusal paths (no/wrong/unset confirm → zero deletes): **unit** (mock deleteV2) — AC-1/2/2b.
+- Positive path (enabled + correct confirm → delete): **REAL** — local MCP `tools/call` against
+  live Keap (create→delete→404), token set via env. AC-3.
+- dry_run exempt + token-never-echoed: AC-4/AC-5 unit.
+Code-review (Phase 6B) findings REV-001..004 remediated (fix-findings); re-verified green.
+
+CRITICAL: 0 · WARNING: 1 — CR-003 proven at code + LOCAL runtime; **NOT deployed** (prod runs
+CR-002 build, bulk off). Prod runtime-acceptance pending T-026 (PR + redeploy + set
+`KEAP_BULK_DELETE_CONFIRM`).
+
 ## CRITICAL / WARNING / PASSED
 - CRITICAL: 0
 - WARNING: 0 — runtime evidence now PASSED (live Keap, above).

@@ -34,5 +34,22 @@
 - T-017a | `wrangler deploy` to production | release | wrangler.jsonc (sqlite DO migration) | — | [x] DONE 2026-06-18, Version e4312d0e, https://keap-mcp.zeyadhq.workers.dev (verified live: /mcp → 401 OAuth gate) |
 - T-017b | Prove DO serialization under concurrent load on deployed /mcp | release | scripts/deployed-do-proof.mjs | BUG-001 residual | [x] DONE 2026-06-18 — authed OAuth + real MCP tools/call: single 8-delete=1330ms vs 3×concurrent 24-delete=2866ms (2.15×) → concurrent calls serialized by the shared DO budget (per-call limiter would be ~1×). tools/list confirms keap_bulk_delete_contacts live on prod. Caveat: cross-call sharing proven; true multi-isolate is probabilistic (one DO id by construction). |
 
+## CR-002 — close No-ship conditions (commit f4c6e18, merged via PR #3)
+| Task | Description | FR/Bug | Done |
+|------|-------------|--------|------|
+| T-018 | Scope 30s timeout to deleteV2 only (off global requestV2) | BUG-006/FR-014 | [x] tsc+tests |
+| T-019 | Kill-switch KEAP_BULK_DELETE_ENABLED (default off, both transports) | BUG-005/FR-015 | [x] 29/29; prod shows 455 tools, bulk absent |
+| T-020 | Admin secret via x-approval-secret header, reject query string | BUG-004/FR-016 | [x] prod header works, query 400 |
+| T-021 | Merge PR #3 + redeploy from merged base | CF-4 | [x] merged 22:22Z; redeployed Version b29e83cf |
+| T-022 | Rotate APPROVAL_SECRET (leaked in chat) | BUG-004 ops | [x] rotated (random, unretained); old secret now 403. USER must set own to regain admin mint. |
+| T-023 | Revoke clients minted under old secret | BUG-004 ops | [~] neutered by rotation (new authz needs new secret); explicit KV delete = optional hygiene |
+
+## CR-003 — confirm-gate (FR-017) — pending implement
+| Task | Description | FR | Done |
+|------|-------------|----|------|
+| T-024 | Handler requires `confirm`==env token to execute (dry_run exempt); refusal report when absent/wrong; thread `confirmToken` via dispatchTool/handleBulkTool; wire worker.ts + server.ts env KEAP_BULK_DELETE_CONFIRM | FR-017 | [x] |
+| T-025 | Tests AC-1..5 (+ token-unset default-deny): no-confirm refused (no deleteV2), wrong-confirm refused, correct-confirm runs, dry_run exempt, token never echoed | FR-017 | [x] 35/35 |
+| T-026 | Re-verify (vitest + local MCP E2E with confirm) ✓; 2nd PR + redeploy + set prod KEAP_BULK_DELETE_CONFIRM | FR-017 | [~] code+tests+local E2E done; PR/redeploy pending (needs merge auth + prod secret) |
+
 ## Non Production Elements
-None. Retroactive task ledger over already-implemented + committed work; T-017 is the only open (deploy) item, explicitly unchecked.
+None. T-024..T-026 pending implement (CR-003). Prior tasks implemented + merged + deployed.

@@ -272,6 +272,23 @@ text above is preserved; the decisions below supersede it where they conflict.
 tsc clean; vitest 26/26; live MCP E2E re-run (create→delete→404); `wrangler deploy --dry-run`
 bundles the DO. Unproven: multi-isolate DO serialization under deployed concurrent load.
 
+## 5.6. CR-003 — confirm-gate design (FR-017)
+- **Mechanism:** `handleBulkDeleteContacts` gains a `confirm` arg + an injected expected token
+  (from env `KEAP_BULK_DELETE_CONFIRM`, threaded like `bulkDeleteEnabled` via
+  getAllTools/dispatchTool opts so it's transport-agnostic and NEVER in the tool schema value).
+- **Rule:** if NOT `dry_run` and (`confirm !== expectedToken` or token unset) → return a refusal
+  report `{aborted:true, reason:'confirm-required', deleted:[], failed:[]}` (no deleteV2 calls).
+  `dry_run` short-circuits before this (preview needs no confirm).
+- **Why model-blind:** the token lives in server env; the model can't read it, so it cannot
+  self-authorize. A human supplies it per batch (deliberate authorization). True air-gap
+  (out-of-band nonce) is logged to §6 as a future option.
+- **Schema:** add optional `confirm: {type:string}` to inputSchema (description says "required to
+  execute; value is the server confirm token, supplied by a human").
+- **Wiring:** worker.ts `env.KEAP_BULK_DELETE_CONFIRM`; server.ts `process.env...`; pass as
+  `dispatchTool(..., { acquire, bulkDeleteEnabled, confirmToken })`.
+- **Edit plan:** bulk-tools.ts (handler + handleBulkTool sig), register.ts (getAllTools no-op /
+  dispatchTool opts), worker.ts + server.ts (env wiring), bulk-tools.test.ts (AC-1..5).
+
 ## 6. Out-of-scope tech debt (logged, not fixed here)
 - **`KeapClient` v2 rate-limit tracking is broken** (§1A): it reads `x-rate-limit-*` headers
   that Keap v2 doesn't send, so `checkRateLimit()` is inert for v2 across ALL 343 generated

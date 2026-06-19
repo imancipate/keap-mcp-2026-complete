@@ -2,7 +2,7 @@ schema_version: 3
 feature: "keap-v2-bulk-delete-contacts"
 created_at: "2026-06-17"
 last_updated: "2026-06-17T00:00:00Z"
-feature_mode: "lite"
+feature_mode: "standard"   # escalated lite→standard at CR-003 (bridge run); append-only
 backfilled: false
 v2_native: true
 speckit_mode: "classic"
@@ -26,7 +26,13 @@ phases:
   revalidation:
     status: "not_applicable"
   bridge:
-    status: "not_applicable"
+    status: "completed"
+    digest_path: "spec.md"
+    note: "run at CR-003 escalation lite→standard"
+  pre_impl_review:
+    status: "completed"
+    digest_path: "pre-impl-review.md"
+    note: "CR-003 confirm-gate design approved"
   plan:
     status: "completed"
     digest_path: "plan.md"
@@ -35,11 +41,13 @@ phases:
     status: "completed"
     digest_path: "tasks.md"
     note: "lite no longer skips tasks.md (policy directive 2026-06-18); generated retroactively for plan↔tasks↔code traceability"
-  pre_impl_review:
-    status: "not_applicable"
   implement:
     status: "completed"
     digest_path: "implementation-log.md"
+  code_review_cr003:
+    status: "completed"
+    digest_path: "code-review.md"
+    note: "REV-001..004 remediated via fix-findings; REV-005 deferred; 35/35 + E2E"
   code_review:
     status: "not_applicable"
   release_readiness:
@@ -129,10 +137,11 @@ bugfix:
 
 sync_runs:
   last_run: "2026-06-18"
-  total_runs: 1
-  last_drift_count: 1
+  total_runs: 2
+  last_drift_count: 0
   last_critical_count: 0
   last_verdict: "CONSISTENT"
+  note: "run #2 standard mode; FR-017 design-complete, implement-pending (expected forward-state, not drift)"
 
 change_requests:
   - id: "CR-001"
@@ -151,3 +160,13 @@ change_requests:
     tasks_added: 0
     phase_rollback: "implement→verify (re-run in place) + merge/redeploy"
     resolves: ["BUG-004", "BUG-005", "BUG-006", "CF-4"]
+  - id: "CR-003"
+    title: "Human-confirm gate (FR-017) for destructive bulk delete; escalate lite→standard"
+    status: "accepted"
+    timestamp: "2026-06-18"
+    design: "confirm-token (model-blind env KEAP_BULK_DELETE_CONFIRM)"
+    artifacts_affected: 5
+    tasks_added: 3
+    phase_rollback: "none (additive); bridge+pre-impl-review run"
+    implemented: true
+    implement_note: "code+tests (35/35)+local MCP E2E done; not deployed (T-026 PR/redeploy pending)"

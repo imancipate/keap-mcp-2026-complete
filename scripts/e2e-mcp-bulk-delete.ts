@@ -15,8 +15,8 @@ async function main() {
   const transport = new StdioClientTransport({
     command: 'npx',
     args: ['tsx', 'src/main.ts'],
-    // CR-002/BUG-005: the destructive tool is opt-in; enable it for this E2E run.
-    env: { ...process.env, KEAP_API_KEY: process.env.KEAP_API_KEY || '', KEAP_BULK_DELETE_ENABLED: 'true' },
+    // CR-002/BUG-005 + CR-003/FR-017: enable the tool AND set the confirm token for this run.
+    env: { ...process.env, KEAP_API_KEY: process.env.KEAP_API_KEY || '', KEAP_BULK_DELETE_ENABLED: 'true', KEAP_BULK_DELETE_CONFIRM: 'e2e-confirm' },
   });
   const client = new Client({ name: 'forge-e2e', version: '1.0.0' }, { capabilities: {} });
   await client.connect(transport);
@@ -45,7 +45,7 @@ async function main() {
 
   const badId = 999999999;
   // 3) bulk delete THROUGH MCP
-  const delRes = await client.callTool({ name: TOOL, arguments: { contact_ids: [...ids, badId], concurrency: 2 } });
+  const delRes = await client.callTool({ name: TOOL, arguments: { contact_ids: [...ids, badId], concurrency: 2, confirm: 'e2e-confirm' } });
   const report = json(delRes);
   console.log('\n=== tools/call keap_bulk_delete_contacts report ===');
   console.log(JSON.stringify(report, null, 2));
