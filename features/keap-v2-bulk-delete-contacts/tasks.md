@@ -49,7 +49,7 @@
 |------|-------------|----|------|
 | T-024 | Handler requires `confirm`==env token to execute (dry_run exempt); refusal report when absent/wrong; thread `confirmToken` via dispatchTool/handleBulkTool; wire worker.ts + server.ts env KEAP_BULK_DELETE_CONFIRM | FR-017 | [x] |
 | T-025 | Tests AC-1..5 (+ token-unset default-deny): no-confirm refused (no deleteV2), wrong-confirm refused, correct-confirm runs, dry_run exempt, token never echoed | FR-017 | [x] 35/35 |
-| T-026 | Re-verify (vitest + local MCP E2E with confirm) ✓; 2nd PR + redeploy + set prod KEAP_BULK_DELETE_CONFIRM | FR-017 | [~] code+tests+local E2E done; PR/redeploy pending (needs merge auth + prod secret) |
+| T-026 | Re-verify + 2nd PR + redeploy + set prod KEAP_BULK_DELETE_CONFIRM | FR-017 | [x] PR #4 merged 2026-06-19; redeployed Version ad93b67c; KEAP_BULK_DELETE_CONFIRM set; prod regression clean (455 tools, bulk still off). NOTE: token value is "CONFIRM" (guessable — rotate before enabling bulk in prod). |
 
 ## Non Production Elements
 None. T-024..T-026 pending implement (CR-003). Prior tasks implemented + merged + deployed.
