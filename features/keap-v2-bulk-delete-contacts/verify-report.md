@@ -77,6 +77,14 @@ CRITICAL: 0 · WARNING: 1 — CR-003 proven at code + LOCAL runtime; **NOT deplo
 CR-002 build, bulk off). Prod runtime-acceptance pending T-026 (PR + redeploy + set
 `KEAP_BULK_DELETE_CONFIRM`).
 
+
+## CR-003 gate stress test — DEPLOYED prod, 2026-06-19
+Empty-token bypass fixed (PR #5, Version 3b0d7b29) + bulk ENABLED in prod. Stress via real
+OAuth+MCP tools/call (scripts/stress-confirm-gate.mjs), bogus non-existent ids:
+- wrong confirm → REFUSED ✅ (0 deletes) · no confirm → REFUSED ✅ · empty confirm → REFUSED ✅
+- guess "CONFIRM" → REFUSED ✅ (live token is a real rotated value, not guessable)
+Verdict: gate has teeth on the live worker. Positive path human-held (untested by design).
+
 ## CRITICAL / WARNING / PASSED
 - CRITICAL: 0
 - WARNING: 0 — runtime evidence now PASSED (live Keap, above).
