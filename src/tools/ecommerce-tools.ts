@@ -10,10 +10,10 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          product_name: { type: 'string', description: 'Product name', required: true },
+          product_name: { type: 'string', description: 'Product name' },
           product_short_desc: { type: 'string', description: 'Short description' },
           product_desc: { type: 'string', description: 'Full description' },
-          product_price: { type: 'number', description: 'Product price', required: true },
+          product_price: { type: 'number', description: 'Product price' },
           sku: { type: 'string', description: 'SKU code' },
           subscription_only: { type: 'boolean', description: 'Is subscription-only product', default: false },
           url: { type: 'string', description: 'Product URL' },
@@ -27,7 +27,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          product_id: { type: 'number', description: 'Product ID', required: true },
+          product_id: { type: 'number', description: 'Product ID' },
         },
         required: ['product_id'],
       },
@@ -38,7 +38,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          product_id: { type: 'number', description: 'Product ID', required: true },
+          product_id: { type: 'number', description: 'Product ID' },
           product_name: { type: 'string', description: 'Product name' },
           product_price: { type: 'number', description: 'Product price' },
           sku: { type: 'string', description: 'SKU code' },
@@ -53,7 +53,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          product_id: { type: 'number', description: 'Product ID to delete', required: true },
+          product_id: { type: 'number', description: 'Product ID to delete' },
         },
         required: ['product_id'],
       },
@@ -77,10 +77,10 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          order_title: { type: 'string', description: 'Order title', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          order_title: { type: 'string', description: 'Order title' },
           order_type: { type: 'string', description: 'Order type (Online, Offline)', default: 'Online' },
-          order_items: { type: 'array', items: { type: 'object' }, description: 'Array of order items', required: true },
+          order_items: { type: 'array', items: { type: 'object' }, description: 'Array of order items' },
           promo_codes: { type: 'array', items: { type: 'string' }, description: 'Promo codes to apply' },
         },
         required: ['contact_id', 'order_title', 'order_items'],
@@ -92,7 +92,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          order_id: { type: 'number', description: 'Order ID', required: true },
+          order_id: { type: 'number', description: 'Order ID' },
         },
         required: ['order_id'],
       },
@@ -103,7 +103,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          order_id: { type: 'number', description: 'Order ID to delete', required: true },
+          order_id: { type: 'number', description: 'Order ID to delete' },
         },
         required: ['order_id'],
       },
@@ -130,7 +130,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          order_id: { type: 'number', description: 'Order ID', required: true },
+          order_id: { type: 'number', description: 'Order ID' },
         },
         required: ['order_id'],
       },
@@ -142,7 +142,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          transaction_id: { type: 'number', description: 'Transaction ID', required: true },
+          transaction_id: { type: 'number', description: 'Transaction ID' },
         },
         required: ['transaction_id'],
       },
@@ -168,9 +168,9 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
-          product_id: { type: 'number', description: 'Product ID', required: true },
-          subscription_plan_id: { type: 'number', description: 'Subscription plan ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
+          product_id: { type: 'number', description: 'Product ID' },
+          subscription_plan_id: { type: 'number', description: 'Subscription plan ID' },
           quantity: { type: 'number', description: 'Quantity', default: 1 },
           billing_amount: { type: 'number', description: 'Billing amount' },
           credit_card_id: { type: 'number', description: 'Credit card ID for payment' },
@@ -184,7 +184,7 @@ export function createEcommerceTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          subscription_id: { type: 'number', description: 'Subscription ID', required: true },
+          subscription_id: { type: 'number', description: 'Subscription ID' },
         },
         required: ['subscription_id'],
       },

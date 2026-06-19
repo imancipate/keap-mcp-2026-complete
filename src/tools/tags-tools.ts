@@ -9,7 +9,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Tag name', required: true },
+          name: { type: 'string', description: 'Tag name' },
           description: { type: 'string', description: 'Tag description' },
           category_id: { type: 'number', description: 'Tag category ID' },
         },
@@ -22,7 +22,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          tag_id: { type: 'number', description: 'Tag ID', required: true },
+          tag_id: { type: 'number', description: 'Tag ID' },
         },
         required: ['tag_id'],
       },
@@ -45,7 +45,7 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Category name', required: true },
+          name: { type: 'string', description: 'Category name' },
           description: { type: 'string', description: 'Category description' },
         },
         required: ['name'],
@@ -57,6 +57,19 @@ export function createTagsTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {},
+      },
+    },
+    {
+      name: 'keap_list_tag_contacts',
+      description: 'List all contacts that have a given tag (Keap GET /tags/{tagId}/contacts). Returns a `count` total plus a page of contacts; paginate with limit/offset to pull the full audience for a tag. This is the supported way to filter contacts by tag.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          tag_id: { type: 'number', description: 'Tag ID to list contacts for' },
+          limit: { type: 'number', description: 'Results per page (max 1000)', default: 200 },
+          offset: { type: 'number', description: 'Pagination offset', default: 0 },
+        },
+        required: ['tag_id'],
       },
     },
   ];
@@ -96,6 +109,13 @@ export async function handleTagsTool(
 
       case 'keap_list_tag_categories':
         result = await client.get('/tags/categories');
+        break;
+
+      case 'keap_list_tag_contacts':
+        result = await client.get(`/tags/${args.tag_id}/contacts`, {
+          limit: args.limit ?? 200,
+          offset: args.offset ?? 0,
+        });
         break;
 
       default:

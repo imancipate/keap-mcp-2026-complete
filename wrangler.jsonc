@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "keap-mcp",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-01-28",
+  // nodejs_compat: provides `process.env` + Node globals used by the Keap client.
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // OAuthProvider stores grants/tokens here. Binding MUST be named OAUTH_KV.
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "91c22d314f3d4fa397d36b3533ffa96e"
+    }
+  ],
+  // CR-001/BUG-001: global rate-limit lease shared across worker isolates.
+  "durable_objects": {
+    "bindings": [
+      { "name": "RATE_LIMITER", "class_name": "KeapRateLimiter" }
+    ]
+  },
+  "migrations": [
+    // SQLite-backed DO (required on the free plan; our limiter uses only in-memory
+    // state, so the storage backend is irrelevant to behavior).
+    { "tag": "v1", "new_sqlite_classes": ["KeapRateLimiter"] }
+  ],
+  "vars": {
+    // Non-secret defaults. Secrets (KEAP_API_KEY, APPROVAL_SECRET) via `wrangler secret put`.
+  }
+}

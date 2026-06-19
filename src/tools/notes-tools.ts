@@ -9,9 +9,9 @@ export function createNotesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          contact_id: { type: 'number', description: 'Contact ID', required: true },
+          contact_id: { type: 'number', description: 'Contact ID' },
           title: { type: 'string', description: 'Note title' },
-          body: { type: 'string', description: 'Note content', required: true },
+          body: { type: 'string', description: 'Note content' },
           type: { type: 'string', description: 'Note type (Appointment, Call, Email, etc.)' },
           user_id: { type: 'number', description: 'User ID who created the note' },
         },
@@ -24,7 +24,7 @@ export function createNotesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          note_id: { type: 'number', description: 'Note ID', required: true },
+          note_id: { type: 'number', description: 'Note ID' },
         },
         required: ['note_id'],
       },
@@ -35,7 +35,7 @@ export function createNotesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          note_id: { type: 'number', description: 'Note ID', required: true },
+          note_id: { type: 'number', description: 'Note ID' },
           title: { type: 'string', description: 'Note title' },
           body: { type: 'string', description: 'Note content' },
           type: { type: 'string', description: 'Note type' },
@@ -49,7 +49,7 @@ export function createNotesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          note_id: { type: 'number', description: 'Note ID to delete', required: true },
+          note_id: { type: 'number', description: 'Note ID to delete' },
         },
         required: ['note_id'],
       },

@@ -9,7 +9,7 @@ export function createCompaniesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          company_name: { type: 'string', description: 'Company name', required: true },
+          company_name: { type: 'string', description: 'Company name' },
           email: { type: 'string', description: 'Company email' },
           phone: { type: 'string', description: 'Company phone' },
           address_line1: { type: 'string', description: 'Street address' },
@@ -29,7 +29,7 @@ export function createCompaniesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          company_id: { type: 'number', description: 'Company ID', required: true },
+          company_id: { type: 'number', description: 'Company ID' },
         },
         required: ['company_id'],
       },
@@ -40,7 +40,7 @@ export function createCompaniesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          company_id: { type: 'number', description: 'Company ID', required: true },
+          company_id: { type: 'number', description: 'Company ID' },
           company_name: { type: 'string', description: 'Company name' },
           email: { type: 'string', description: 'Company email' },
           phone: { type: 'string', description: 'Company phone' },
@@ -69,7 +69,7 @@ export function createCompaniesTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          company_id: { type: 'number', description: 'Company ID', required: true },
+          company_id: { type: 'number', description: 'Company ID' },
           limit: { type: 'number', description: 'Max results', default: 50 },
           offset: { type: 'number', description: 'Pagination offset', default: 0 },
         },

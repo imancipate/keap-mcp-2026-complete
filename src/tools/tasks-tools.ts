@@ -9,7 +9,7 @@ export function createTasksTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          title: { type: 'string', description: 'Task title', required: true },
+          title: { type: 'string', description: 'Task title' },
           description: { type: 'string', description: 'Task description' },
           contact_id: { type: 'number', description: 'Associated contact ID' },
           due_date: { type: 'string', description: 'Due date (ISO format)' },
@@ -27,7 +27,7 @@ export function createTasksTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          task_id: { type: 'number', description: 'Task ID', required: true },
+          task_id: { type: 'number', description: 'Task ID' },
         },
         required: ['task_id'],
       },
@@ -38,7 +38,7 @@ export function createTasksTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          task_id: { type: 'number', description: 'Task ID', required: true },
+          task_id: { type: 'number', description: 'Task ID' },
           title: { type: 'string', description: 'Task title' },
           description: { type: 'string', description: 'Task description' },
           due_date: { type: 'string', description: 'Due date' },
@@ -54,7 +54,7 @@ export function createTasksTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          task_id: { type: 'number', description: 'Task ID to delete', required: true },
+          task_id: { type: 'number', description: 'Task ID to delete' },
         },
         required: ['task_id'],
       },
@@ -92,7 +92,7 @@ export function createTasksTools(client: KeapClient): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {
-          task_id: { type: 'number', description: 'Task ID', required: true },
+          task_id: { type: 'number', description: 'Task ID' },
           completion_date: { type: 'string', description: 'Completion date (ISO format)' },
         },
         required: ['task_id'],

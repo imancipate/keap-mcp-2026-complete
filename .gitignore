@@ -1,0 +1,17 @@
+# Secrets — never commit
+.env
+.env.*
+.dev.vars
+
+# Dependencies / build
+node_modules/
+dist/
+.wrangler/
+
+# Tooling / OS
+.claude/
+.DS_Store
+*.log
+.worktrees/
+.specify/
+.product-forge/
