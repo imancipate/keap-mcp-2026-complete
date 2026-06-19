@@ -26,6 +26,8 @@ export interface Env {
   APPROVAL_SECRET: string;
   // CR-002/BUG-005: destructive bulk-delete is opt-in. Default OFF.
   KEAP_BULK_DELETE_ENABLED?: string;
+  // CR-003/FR-017: human-confirm token required to execute a bulk delete.
+  KEAP_BULK_DELETE_CONFIRM?: string;
   // Bindings
   OAUTH_KV: KVNamespace;
   OAUTH_PROVIDER: any;
@@ -51,6 +53,7 @@ function createKeapMcpServer(env: Env): McpServer {
   const client = new KeapClient(env.KEAP_ACCESS_TOKEN, env.KEAP_API_KEY);
   const acquire = makeDoAcquire(env);
   const bulkDeleteEnabled = env.KEAP_BULK_DELETE_ENABLED === 'true';
+  const confirmToken = env.KEAP_BULK_DELETE_CONFIRM; // CR-003/FR-017
   const mcp = new McpServer(
     { name: 'keap-mcp-server', version: '1.0.0' },
     { capabilities: { tools: {} } }
@@ -58,7 +61,7 @@ function createKeapMcpServer(env: Env): McpServer {
   const low = mcp.server;
   low.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: getAllTools(client, { bulkDeleteEnabled }) }));
   low.setRequestHandler(CallToolRequestSchema, async (request) =>
-    dispatchTool(request.params.name, request.params.arguments, client, { acquire, bulkDeleteEnabled })
+    dispatchTool(request.params.name, request.params.arguments, client, { acquire, bulkDeleteEnabled, confirmToken })
   );
   return mcp;
 }

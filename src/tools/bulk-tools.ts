@@ -72,6 +72,13 @@ export function createBulkTools(_client: KeapClient): Tool[] {
             type: 'boolean',
             description: 'Preview only — validate IDs and report would_delete, delete nothing. Default false.',
           },
+          confirm: {
+            type: 'string',
+            description:
+              'REQUIRED to actually delete (CR-003/FR-017): must equal the server confirm token ' +
+              '(env KEAP_BULK_DELETE_CONFIRM), which a human supplies per batch. Omit/wrong = refused. ' +
+              'Not needed for dry_run.',
+          },
         },
         required: ['contact_ids'],
       },
@@ -165,7 +172,10 @@ export async function handleBulkDeleteContacts(
   // pass a shared limiter (Durable Object-backed) so the 25 req/s budget is
   // enforced GLOBALLY. When omitted, falls back to the process-global limiter
   // (correct for single-instance / stdio).
-  acquireOverride?: () => Promise<void>
+  acquireOverride?: () => Promise<void>,
+  // CR-003/FR-017: the server confirm token. A real delete runs only if args.confirm
+  // matches it. undefined/'' means the gate is unconfigured → default-deny.
+  expectedConfirm?: string
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   const raw = args?.contact_ids;
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -199,6 +209,26 @@ export async function handleBulkDeleteContacts(
       failed: [],
       would_delete: ids,
     };
+    return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
+  }
+
+  // CR-003/FR-017: human-confirm gate. dry_run already returned above (preview is exempt).
+  // A real delete proceeds ONLY if the caller's confirm matches the server token. Default-deny
+  // when the token is unset. Protects against an autonomous LLM self-authorizing deletes.
+  if (!expectedConfirm || args?.confirm !== expectedConfirm) {
+    const report: BulkDeleteReport = {
+      dry_run: false,
+      aborted: true,
+      attempted: 0,
+      total: ids.length,
+      ok: 0,
+      fail: 0,
+      deleted: [],
+      failed: [
+        { id: -1, status: null, error: 'confirm-required: missing or incorrect confirm token — no deletes performed (CR-003/FR-017). A human must supply the server confirm token.' },
+      ],
+    };
+    console.error(`[keap_bulk_delete_contacts] REFUSED: confirm gate (${ids.length} ids not deleted)`);
     return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
   }
 
@@ -283,10 +313,11 @@ export async function handleBulkTool(
   name: string,
   args: any,
   client: KeapClient,
-  acquireOverride?: () => Promise<void>
+  acquireOverride?: () => Promise<void>,
+  expectedConfirm?: string
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   if (name === 'keap_bulk_delete_contacts') {
-    return handleBulkDeleteContacts(args, client, acquireOverride);
+    return handleBulkDeleteContacts(args, client, acquireOverride, expectedConfirm);
   }
   throw new Error(`Unknown bulk tool: ${name}`);
 }

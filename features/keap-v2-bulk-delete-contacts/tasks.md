@@ -47,9 +47,9 @@
 ## CR-003 — confirm-gate (FR-017) — pending implement
 | Task | Description | FR | Done |
 |------|-------------|----|------|
-| T-024 | Handler requires `confirm`==env token to execute (dry_run exempt); refusal report when absent/wrong; thread `confirmToken` via getAllTools/dispatchTool/handleBulkTool; wire worker.ts + server.ts env KEAP_BULK_DELETE_CONFIRM | FR-017 | [ ] |
-| T-025 | Tests AC-1..5: no-confirm refused (no deleteV2), wrong-confirm refused, correct-confirm runs, dry_run exempt, token never echoed | FR-017 | [ ] |
-| T-026 | Re-verify (vitest + local MCP E2E with confirm) + 2nd PR + redeploy | FR-017 | [ ] |
+| T-024 | Handler requires `confirm`==env token to execute (dry_run exempt); refusal report when absent/wrong; thread `confirmToken` via dispatchTool/handleBulkTool; wire worker.ts + server.ts env KEAP_BULK_DELETE_CONFIRM | FR-017 | [x] |
+| T-025 | Tests AC-1..5 (+ token-unset default-deny): no-confirm refused (no deleteV2), wrong-confirm refused, correct-confirm runs, dry_run exempt, token never echoed | FR-017 | [x] 35/35 |
+| T-026 | Re-verify (vitest + local MCP E2E with confirm) ✓; 2nd PR + redeploy + set prod KEAP_BULK_DELETE_CONFIRM | FR-017 | [~] code+tests+local E2E done; PR/redeploy pending (needs merge auth + prod secret) |
 
 ## Non Production Elements
 None. T-024..T-026 pending implement (CR-003). Prior tasks implemented + merged + deployed.
