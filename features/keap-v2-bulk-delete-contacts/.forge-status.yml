@@ -169,4 +169,5 @@ change_requests:
     tasks_added: 3
     phase_rollback: "none (additive); bridge+pre-impl-review run"
     implemented: true
-    implement_note: "code+tests (35/35)+local MCP E2E done; not deployed (T-026 PR/redeploy pending)"
+    deployed: true
+    implement_note: "code+tests (35/35)+local MCP E2E; PR #4 merged 2026-06-19, redeployed Version ad93b67c, KEAP_BULK_DELETE_CONFIRM set (value 'CONFIRM' — guessable, rotate before enabling bulk). Prod regression clean; bulk still ENABLED=false."

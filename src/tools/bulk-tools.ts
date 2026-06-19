@@ -227,7 +227,9 @@ export async function handleBulkDeleteContacts(
   // CR-003/FR-017: human-confirm gate. dry_run already returned above (preview is exempt).
   // A real delete proceeds ONLY if the caller's confirm matches the server token. Default-deny
   // when the token is unset. Protects against an autonomous LLM self-authorizing deletes.
-  if (!safeEqual(args?.confirm, expectedConfirm)) {
+  // Default-deny when the server token is unset/empty (e.g. a mis-saved empty secret):
+  // an empty token must NEVER be satisfiable, even by confirm:"". Then constant-time compare.
+  if (!expectedConfirm || !safeEqual(args?.confirm, expectedConfirm)) {
     console.error(`[keap_bulk_delete_contacts] REFUSED: confirm gate (${ids.length} ids not deleted)`);
     return wrap(
       makeReport({

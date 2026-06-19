@@ -171,6 +171,13 @@ describe('keap_bulk_delete_contacts — confirm gate (CR-003/FR-017)', () => {
     expect(deleteV2).not.toHaveBeenCalled();
   });
 
+  it('AC-2c: EMPTY server token → default-deny even if caller sends confirm:"" (bypass guard)', async () => {
+    const deleteV2 = vi.fn();
+    const report = parseReport(await handleBulkDeleteContacts({ contact_ids: [1], confirm: '' }, fakeClient(deleteV2), undefined, ''));
+    expect(report.aborted).toBe(true);
+    expect(deleteV2).not.toHaveBeenCalled();
+  });
+
   it('AC-3: correct confirm → deletes proceed', async () => {
     const deleteV2 = vi.fn(async () => {});
     const report = parseReport(await handleBulkDeleteContacts({ contact_ids: [1, 2], confirm: CONFIRM }, fakeClient(deleteV2), undefined, CONFIRM));
