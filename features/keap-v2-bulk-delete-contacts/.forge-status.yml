@@ -133,10 +133,11 @@ bugfix:
 
 sync_runs:
   last_run: "2026-06-18"
-  total_runs: 1
-  last_drift_count: 1
+  total_runs: 2
+  last_drift_count: 0
   last_critical_count: 0
   last_verdict: "CONSISTENT"
+  note: "run #2 standard mode; FR-017 design-complete, implement-pending (expected forward-state, not drift)"
 
 change_requests:
   - id: "CR-001"
