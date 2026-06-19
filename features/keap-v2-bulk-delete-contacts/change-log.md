@@ -64,3 +64,28 @@ tsc clean; vitest 29/29 (+3 kill-switch tests). Deploy + prod re-verify recorded
 
 ### Non Production Elements
 None. The leftover test OAuth client is being revoked as part of C.
+
+## CR-003: Human-confirm gate for the destructive tool — 2026-06-18
+
+| Field | Value |
+|-------|-------|
+| Status | ACCEPTED — design: confirm-token (model-blind env token) |
+| Priority | Must (destructive safety) |
+| Escalation | feature_mode lite → **standard** (ran bridge → spec.md; append-only) |
+| Impact | product-spec FR-017, spec.md (new), plan.md §5.6, tasks T-024..026, code, tests |
+| Phase rollback | none (additive guard) |
+
+### Artifacts (this CR)
+| Artifact | Change |
+|----------|--------|
+| product-spec.md | +FR-017 |
+| spec.md | NEW (bridge; whole-feature SpecKit projection incl CR-003 AC-1..5) |
+| plan.md | +§5.6 confirm-gate design |
+| tasks.md | +T-024 (handler), T-025 (tests), T-026 (verify+PR+deploy) |
+| pre-impl-review.md | NEW — design + risk register, verdict APPROVED |
+
+### Decision notes
+Confirm-token chosen for buildability + LLM-resistance (token not in model context). Two-phase
+out-of-band logged as future air-gap. Bridge run per user request → standard mode.
+Implement pending (next gate).
+

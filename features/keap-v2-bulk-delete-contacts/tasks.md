@@ -44,6 +44,12 @@
 | T-022 | Rotate APPROVAL_SECRET (leaked in chat) | BUG-004 ops | [x] rotated (random, unretained); old secret now 403. USER must set own to regain admin mint. |
 | T-023 | Revoke clients minted under old secret | BUG-004 ops | [~] neutered by rotation (new authz needs new secret); explicit KV delete = optional hygiene |
 
+## CR-003 — confirm-gate (FR-017) — pending implement
+| Task | Description | FR | Done |
+|------|-------------|----|------|
+| T-024 | Handler requires `confirm`==env token to execute (dry_run exempt); refusal report when absent/wrong; thread `confirmToken` via getAllTools/dispatchTool/handleBulkTool; wire worker.ts + server.ts env KEAP_BULK_DELETE_CONFIRM | FR-017 | [ ] |
+| T-025 | Tests AC-1..5: no-confirm refused (no deleteV2), wrong-confirm refused, correct-confirm runs, dry_run exempt, token never echoed | FR-017 | [ ] |
+| T-026 | Re-verify (vitest + local MCP E2E with confirm) + 2nd PR + redeploy | FR-017 | [ ] |
+
 ## Non Production Elements
-None. Retroactive task ledger over implemented + committed + merged + deployed work. T-023 is
-partial (rotation neutralizes; KV purge optional).
+None. T-024..T-026 pending implement (CR-003). Prior tasks implemented + merged + deployed.
