@@ -44,6 +44,10 @@ phases:
   implement:
     status: "completed"
     digest_path: "implementation-log.md"
+  code_review_cr003:
+    status: "completed"
+    digest_path: "code-review.md"
+    note: "REV-001..004 remediated via fix-findings; REV-005 deferred; 35/35 + E2E"
   code_review:
     status: "not_applicable"
   release_readiness:

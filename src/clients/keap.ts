@@ -173,7 +173,7 @@ export class KeapClient {
     return this.requestV2<T>({ method: 'PATCH', url: path, data });
   }
 
-  async deleteV2<T>(path: string, opts?: { timeout?: number; signal?: AbortSignal }): Promise<T> {
+  async deleteV2<T>(path: string, opts?: { timeout?: number }): Promise<T> {
     // CR-002/BUG-006: the 30s default lives HERE (the destructive bulk-delete path),
     // not globally on requestV2. Caller opts override.
     return this.requestV2<T>({ method: 'DELETE', url: path, timeout: 30000, ...opts });
